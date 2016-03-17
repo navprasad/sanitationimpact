@@ -1,0 +1,9 @@
+.idea
+*.pyc
+*~
+staticfiles/
+.pydevproject
+.project
+.ropeproject
+*.out
+*.log
