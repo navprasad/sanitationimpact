@@ -17,3 +17,9 @@ class Ticket(models.Model):
     toilet = models.ForeignKey(Toilet, related_name='tickets')
     problem = models.ForeignKey(Problem, related_name='tickets')
     status = models.IntegerField(default=UNRESOLVED)
+
+
+class Recording(models.Model):
+    filename = models.CharField(max_length=255)
+    provider = models.ForeignKey(Provider)
+    ticket = models.ForeignKey(Ticket)
