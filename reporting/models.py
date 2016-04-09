@@ -1,6 +1,6 @@
 from django.db import models
 
-from admin.models import Problem, Toilet
+from administration.models import Problem, Toilet
 from provider.models import Provider
 
 
