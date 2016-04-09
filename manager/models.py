@@ -5,3 +5,6 @@ class Manager(models.Model):
     name = models.CharField(max_length=100)
     phone_number = models.CharField(max_length=20)
     address = models.TextField()
+
+    def __unicode__(self):
+        return str(self.name) + '(' + self.phone_number + ')'

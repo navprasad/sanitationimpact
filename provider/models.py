@@ -14,5 +14,8 @@ class Provider(models.Model):
     toilets = models.ManyToManyField(Toilet, related_name='providers')
     problems = models.ManyToManyField(Problem, related_name='providers')
 
+    def __unicode__(self):
+        return str(self.name) + '(' + self.phone_number + ')'
+
     class Meta:
         index_together = ["provider_id", "pin_code"]
