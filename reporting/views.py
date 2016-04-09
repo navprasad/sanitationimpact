@@ -49,7 +49,7 @@ class ReportProblem(APIView):
                 Problem.MultipleObjectsReturned):
             return Response({'success': False, 'error': "Invalid Toilet/Problem"})
 
-        providers = Provider.objects.filter(toilets__toilet_id__contains=toilet_id, problems__id__contains=problem)
+        providers = Provider.objects.filter(toilets__toilet_id=toilet_id, problems__id=problem.id)
         if not providers:
             return Response({'success': False, 'error': "No provider found for the Toilet/Problem"})
         provider = providers[0]
