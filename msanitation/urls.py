@@ -1,17 +1,19 @@
-from django.conf.urls import patterns, include, url
+from django.conf.urls import include, url
+
+import administration.urls
+import manager.urls
+import provider.urls
+import reporting.urls
 
 # Uncomment the next two lines to enable the admin:
-# from django.contrib import admin
-# admin.autodiscover()
+from django.contrib import admin
+admin.autodiscover()
 
-urlpatterns = patterns('',
-    # Examples:
-    # url(r'^$', 'msanitation.views.home', name='home'),
-    # url(r'^msanitation/', include('msanitation.foo.urls')),
+urlpatterns = [
+    url(r'^admin/', include(admin.site.urls)),
 
-    # Uncomment the admin/doc line below to enable admin documentation:
-    # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
-
-    # Uncomment the next line to enable the admin:
-    # url(r'^admin/', include(admin.site.urls)),
-)
+    url(r'^administration/', include(administration.urls)),
+    url(r'^manager/', include(manager.urls)),
+    url(r'^provider/', include(provider.urls)),
+    url(r'^reporting/', include(reporting.urls)),
+]
