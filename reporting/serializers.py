@@ -18,3 +18,9 @@ class ReportProblemSerializer(serializers.Serializer):
     toilet_id = serializers.CharField(max_length=100)
     category_index = serializers.IntegerField()
     problem_index = serializers.IntegerField()
+
+
+class ReportFixSerializer(serializers.Serializer):
+    provider_id = serializers.CharField(max_length=100)
+    pin_code = serializers.CharField(max_length=10)
+    ticket_id = serializers.CharField(max_length=40)
