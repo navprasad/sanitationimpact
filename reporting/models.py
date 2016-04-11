@@ -19,6 +19,9 @@ class Ticket(models.Model):
     problem = models.ForeignKey(Problem, related_name='tickets')
     status = models.IntegerField(default=UNRESOLVED)
 
+    def __unicode__(self):
+        return self.ticket_id
+
 
 class Recording(models.Model):
     filename = models.CharField(max_length=255)
