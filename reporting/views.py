@@ -73,7 +73,8 @@ class IsValidProviderTicket(APIView):
             return Response({'success': False, 'error': "Invalid POST data"})
         try:
             provider = Provider.objects.get(provider_id=provider_id)
-            ticket = Ticket.objects.get(ticket_id=ticket_id)
+            # ticket = Ticket.objects.get(ticket_id=ticket_id)
+            ticket = Ticket.objects.exclude(status=Ticket.FIXED).get(pk=ticket_id)
         except (Provider.DoesNotExist, Provider.MultipleObjectsReturned, Ticket.DoesNotExist,
                 Ticket.MultipleObjectsReturned):
             return Response({'success': False, 'error': "Invalid Provider/Ticket"})
@@ -89,11 +90,12 @@ class ReportFix(APIView):
             return Response({'success': False, 'error': serializer.errors})
         provider_id = serializer.validated_data['provider_id']
         pin_code = serializer.validated_data['pin_code']
-        ticket_id = serializer.validated_data['ticket_id']
+        ticket_id = int(serializer.validated_data['ticket_id'])
         validity_checked = serializer.validated_data['validity_checked']
 
         try:
-            ticket = Ticket.objects.exclude(status=Ticket.FIXED).get(ticket_id=ticket_id)
+            # ticket = Ticket.objects.exclude(status=Ticket.FIXED).get(ticket_id=ticket_id)
+            ticket = Ticket.objects.exclude(status=Ticket.FIXED).get(pk=ticket_id)
             provider = Provider.objects.get(provider_id=provider_id, pin_code=pin_code)
         except (Ticket.DoesNotExist, Ticket.MultipleObjectsReturned, Provider.DoesNotExist,
                 Provider.MultipleObjectsReturned):

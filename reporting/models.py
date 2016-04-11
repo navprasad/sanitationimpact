@@ -20,7 +20,7 @@ class Ticket(models.Model):
     status = models.IntegerField(default=UNRESOLVED)
 
     def __unicode__(self):
-        return self.ticket_id
+        return str(self.id)
 
 
 class Recording(models.Model):
