@@ -57,6 +57,31 @@ class ReportProblem(APIView):
         return Response({'success': True, 'ticket_id': ticket.id})
 
 
+def is_valid_provider_ticket(provider, ticket):
+    if not provider.toilets.filter(pk=ticket.toilet_id).exists():
+        return False
+    if not provider.problems.filter(pk=ticket.problem_id).exists():
+        return False
+    return True
+
+
+class IsValidProviderTicket(APIView):
+    def post(self, request):
+        provider_id = request.data.get('provider_id', None)
+        ticket_id = request.data.get('ticket_id', None)
+        if not provider_id or not ticket_id:
+            return Response({'success': False, 'error': "Invalid POST data"})
+        try:
+            provider = Provider.objects.get(provider_id=provider_id)
+            ticket = Ticket.objects.get(ticket_id=ticket_id)
+        except (Provider.DoesNotExist, Provider.MultipleObjectsReturned, Ticket.DoesNotExist,
+                Ticket.MultipleObjectsReturned):
+            return Response({'success': False, 'error': "Invalid Provider/Ticket"})
+        if not is_valid_provider_ticket(provider, ticket):
+            return Response({'success': False, 'error': "Toilet/Problem not associated with the Provider"})
+        return Response({'success': True})
+
+
 class ReportFix(APIView):
     def post(self, request):
         serializer = ReportFixSerializer(data=request.data)
@@ -65,6 +90,7 @@ class ReportFix(APIView):
         provider_id = serializer.validated_data['provider_id']
         pin_code = serializer.validated_data['pin_code']
         ticket_id = serializer.validated_data['ticket_id']
+        validity_checked = serializer.validated_data['validity_checked']
 
         try:
             ticket = Ticket.objects.exclude(status=Ticket.FIXED).get(ticket_id=ticket_id)
@@ -73,10 +99,7 @@ class ReportFix(APIView):
                 Provider.MultipleObjectsReturned):
             return Response({'success': False, 'error': "Invalid Ticket/Provider"})
 
-        # Check if provider matches the toilet and problem
-        if not provider.toilets.filter(pk=ticket.toilet_id).exists():
-            return Response({'success': False, 'error': "Toilet/Problem not associated with the Provider"})
-        if not provider.problems.filter(pk=ticket.problem_id).exists():
+        if not validity_checked and not is_valid_provider_ticket(provider, ticket):
             return Response({'success': False, 'error': "Toilet/Problem not associated with the Provider"})
 
         ticket.status = Ticket.FIXED

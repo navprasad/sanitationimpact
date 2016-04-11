@@ -24,3 +24,4 @@ class ReportFixSerializer(serializers.Serializer):
     provider_id = serializers.CharField(max_length=100)
     pin_code = serializers.CharField(max_length=10)
     ticket_id = serializers.CharField(max_length=40)
+    validity_checked = serializers.BooleanField(default=False)
