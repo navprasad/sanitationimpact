@@ -49,6 +49,11 @@ class ReportProblem(APIView):
                 Problem.MultipleObjectsReturned):
             return Response({'success': False, 'error': "Invalid Toilet/Problem"})
 
+        providers = Provider.objects.filter(toilets__toilet_id__contains=toilet_id, problems__id__contains=problem)
+        if not providers:
+            return Response({'success': False, 'error': "No provider found for the Toilet/Problem"})
+        provider = providers[0]
+
         # TODO: handle update ticket
         ticket = Ticket(phone_number=phone_number, toilet=toilet, problem=problem)
         ticket.save()
@@ -62,7 +67,11 @@ class ReportProblem(APIView):
 
         urllib2.urlopen(url).read()
 
-        # TODO: find all providers for the problem for the toilet, and send sms to their phone_number
+        # send sms to the provider
+        message = "Complaint registered for Toilet ID: " + str(toilet_id) + ". Ticket ID: " + str(ticket.id)
+        params = "phone_no=" + provider.phone_number + "&api_key=" + api_key + "&message=" + quote(message, safe='')
+        url = url_root + params
+        urllib2.urlopen(url).read()
 
         return Response({'success': True, 'ticket_id': ticket.id})
 
