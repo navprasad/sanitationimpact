@@ -1,0 +1,28 @@
+{% extends 'root.html' %}
+
+{% block navLinks %}
+    <li{% if active == 'ticket' %} class="active"{% endif %}>
+        <a href="{% url 'ticket_view' %}">
+            <i class="pe-7s-ticket"></i>
+            <p>Tickets</p>
+        </a>
+    </li>
+    <li{% if active == 'user' %} class="active"{% endif %}>
+        <a href="{% url 'user_view' %}">
+            <i class="pe-7s-users"></i>
+            <p>Users</p>
+        </a>
+    </li>
+    <li{% if active == 'toilet' %} class="active"{% endif %}>
+        <a href="{% url 'toilet_view' %}">
+            <i class="pe-7s-drop"></i>
+            <p>Toilets</p>
+        </a>
+    </li>
+    <li{% if active == 'problem' %} class="active"{% endif %}>
+        <a href="{% url 'problem_view' %}">
+            <i class="pe-7s-settings"></i>
+            <p>Problems</p>
+        </a>
+    </li>
+{% endblock %}
