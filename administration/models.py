@@ -53,7 +53,7 @@ class UserProfile(models.Model):
         ('M', 'MANAGER'),
         ('P', 'PROVIDER')
     )
-    type_choices = models.CharField(max_length=1, choices=TYPE_CHOICES)
+    type = models.CharField(max_length=1, choices=TYPE_CHOICES)
 
     def __unicode__(self):
         return self.user.username

@@ -8,3 +8,4 @@ staticfiles/
 *.out
 *.log
 *.db
+msanitation/media/*
