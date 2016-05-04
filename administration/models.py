@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 
 class Admin(models.Model):
@@ -41,3 +42,18 @@ class Toilet(models.Model):
 
     def __unicode__(self):
         return str(self.toilet_id) + ': ' + self.address
+
+
+class UserProfile(models.Model):
+    user = models.OneToOneField(User)
+    picture = models.ImageField(upload_to='profile_images', blank=True)
+
+    TYPE_CHOICES = (
+        ('A', 'ADMINISTRATOR'),
+        ('M', 'MANAGER'),
+        ('P', 'PROVIDER')
+    )
+    type_choices = models.CharField(max_length=1, choices=TYPE_CHOICES)
+
+    def __unicode__(self):
+        return self.user.username

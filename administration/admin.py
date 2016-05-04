@@ -1,5 +1,5 @@
 from django.contrib import admin
-from administration.models import Admin, Problem, ProblemCategory, Toilet
+from administration.models import Admin, Problem, ProblemCategory, Toilet, UserProfile
 
 admin.site.register(Admin)
 
@@ -11,3 +11,4 @@ admin.site.register(Problem, ProblemAdmin)
 
 admin.site.register(ProblemCategory)
 admin.site.register(Toilet)
+admin.site.register(UserProfile)
