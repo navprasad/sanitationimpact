@@ -1097,7 +1097,7 @@
 
 <!-- Flot -->
 <script>
-    $(document).ready(function() {
+    $(document).ready(function () {
         var data1 = [
             [gd(2012, 1, 1), 17],
             [gd(2012, 1, 2), 74],
@@ -1176,7 +1176,7 @@
 <script src="{% static "js/maps/jquery-jvectormap-us-aea-en.js" %}"></script>
 <script src="{% static "js/maps/gdp-data.js" %}"></script>
 <script>
-    $(document).ready(function() {
+    $(document).ready(function () {
         $('#world-map-gdp').vectorMap({
             map: 'world_mill_en',
             backgroundColor: 'transparent',
@@ -1188,7 +1188,7 @@
                     normalizeFunction: 'polynomial'
                 }]
             },
-            onRegionTipShow: function(e, el, code) {
+            onRegionTipShow: function (e, el, code) {
                 el.html(el.html() + ' (GDP - ' + gdpData[code] + ')');
             }
         });
@@ -1198,7 +1198,7 @@
 
 <!-- Skycons -->
 <script>
-    $(document).ready(function() {
+    $(document).ready(function () {
         var icons = new Skycons({
                     "color": "#73879C"
                 }),
@@ -1209,7 +1209,7 @@
                 ],
                 i;
 
-        for(i = list.length; i--;)
+        for (i = list.length; i--;)
             icons.set(list[i], list[i]);
 
         icons.play();
@@ -1219,7 +1219,7 @@
 
 <!-- Doughnut Chart -->
 <script>
-    $(document).ready(function() {
+    $(document).ready(function () {
         var options = {
             legend: false,
             responsive: false
@@ -1262,9 +1262,9 @@
 
 <!-- bootstrap-daterangepicker -->
 <script>
-    $(document).ready(function() {
+    $(document).ready(function () {
 
-        var cb = function(start, end, label) {
+        var cb = function (start, end, label) {
             console.log(start.toISOString(), end.toISOString(), label);
             $('#reportrange span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
         };
@@ -1309,25 +1309,25 @@
         };
         $('#reportrange span').html(moment().subtract(29, 'days').format('MMMM D, YYYY') + ' - ' + moment().format('MMMM D, YYYY'));
         $('#reportrange').daterangepicker(optionSet1, cb);
-        $('#reportrange').on('show.daterangepicker', function() {
+        $('#reportrange').on('show.daterangepicker', function () {
             console.log("show event fired");
         });
-        $('#reportrange').on('hide.daterangepicker', function() {
+        $('#reportrange').on('hide.daterangepicker', function () {
             console.log("hide event fired");
         });
-        $('#reportrange').on('apply.daterangepicker', function(ev, picker) {
+        $('#reportrange').on('apply.daterangepicker', function (ev, picker) {
             console.log("apply event fired, start/end dates are " + picker.startDate.format('MMMM D, YYYY') + " to " + picker.endDate.format('MMMM D, YYYY'));
         });
-        $('#reportrange').on('cancel.daterangepicker', function(ev, picker) {
+        $('#reportrange').on('cancel.daterangepicker', function (ev, picker) {
             console.log("cancel event fired");
         });
-        $('#options1').click(function() {
+        $('#options1').click(function () {
             $('#reportrange').data('daterangepicker').setOptions(optionSet1, cb);
         });
-        $('#options2').click(function() {
+        $('#options2').click(function () {
             $('#reportrange').data('daterangepicker').setOptions(optionSet2, cb);
         });
-        $('#destroy').click(function() {
+        $('#destroy').click(function () {
             $('#reportrange').data('daterangepicker').remove();
         });
     });
