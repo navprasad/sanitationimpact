@@ -2,13 +2,36 @@ from django.db import models
 from django.contrib.auth.models import User
 
 
-class Admin(models.Model):
-    name = models.CharField(max_length=100)
-    phone_number = models.CharField(max_length=20)
-    address = models.TextField()
+class UserProfile(models.Model):
+    TYPE_CHOICES = (
+        ('A', 'ADMINISTRATOR'),
+        ('M', 'MANAGER'),
+        ('P', 'PROVIDER')
+    )
+
+    user = models.OneToOneField(User)
+    picture = models.ImageField(upload_to='profile_images', blank=True)
+    phone_number = models.CharField(max_length=20, null=True)
+    address = models.TextField(null=True)
+    type = models.CharField(max_length=1, choices=TYPE_CHOICES)
+
+    def delete(self, *args, **kwargs):
+        self.user.delete()
+        return super(self.__class__, self).delete(*args, **kwargs)
 
     def __unicode__(self):
-        return self.name + '(' + self.phone_number + ')'
+        return self.user.username
+
+
+class Admin(models.Model):
+    user_profile = models.OneToOneField(UserProfile, default=None, null=True)
+
+    def delete(self, *args, **kwargs):
+        self.user_profile.delete()
+        return super(self.__class__, self).delete(*args, **kwargs)
+
+    def __unicode__(self):
+        return self.user_profile.user.username
 
 
 class ProblemCategory(models.Model):
@@ -43,17 +66,3 @@ class Toilet(models.Model):
     def __unicode__(self):
         return str(self.toilet_id) + ': ' + self.address
 
-
-class UserProfile(models.Model):
-    user = models.OneToOneField(User)
-    picture = models.ImageField(upload_to='profile_images', blank=True)
-
-    TYPE_CHOICES = (
-        ('A', 'ADMINISTRATOR'),
-        ('M', 'MANAGER'),
-        ('P', 'PROVIDER')
-    )
-    type = models.CharField(max_length=1, choices=TYPE_CHOICES)
-
-    def __unicode__(self):
-        return self.user.username

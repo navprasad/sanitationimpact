@@ -338,14 +338,25 @@
                             </div>
                             <div class="x_content">
                                 <br/>
-                                <form method="POST" data-parsley-validate class="form-horizontal form-label-left">
+                                <form method="POST" data-parsley-validate class="form-horizontal form-label-left"
+                                      novalidate enctype="multipart/form-data">
                                     {% csrf_token %}
                                     <div class="form-group">
-                                        <label class="control-label col-md-3 col-sm-3 col-xs-12" for="name">Name <span
+                                        <label class="control-label col-md-3 col-sm-3 col-xs-12" for="name">First Name
+                                            <span
                                                 class="required">*</span>
                                         </label>
                                         <div class="col-md-6 col-sm-6 col-xs-12">
-                                            <input type="text" id="id_name" name="name" required="required" class="form-control col-md-7 col-xs-12">
+                                            <input type="text" id="id_first_name" name="first_name" required="required"
+                                                   class="form-control col-md-7 col-xs-12">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-md-3 col-sm-3 col-xs-12" for="name">Last Name
+                                        </label>
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <input type="text" id="id_last_name" name="last_name" class="form-control
+                                            col-md-7 col-xs-12">
                                         </div>
                                     </div>
                                     <div class="form-group">
@@ -377,7 +388,8 @@
                                                     class="required">*</span>
                                         </label>
                                         <div class="col-md-6 col-sm-6 col-xs-12">
-                                            <input type="phone_number" id="id_phone_number" name="email" class="form-control col-md-7 col-xs-12">
+                                            <input type="text" id="id_phone_number" name="phone_number" required="required"
+                                                   class="form-control col-md-7 col-xs-12">
                                         </div>
                                     </div>
                                     <div class="form-group">
@@ -385,7 +397,18 @@
                                             <span class="required">*</span>
                                         </label>
                                         <div class="col-md-6 col-sm-6 col-xs-12">
-                                            <textarea id="id_address" name="address" class="form-control" rows="3"></textarea>
+                                            <textarea id="id_address" name="address" class="form-control" rows="3"
+                                                      required="required"
+                                            ></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-md-3 col-sm-3 col-xs-12"
+                                               for="address">Profile Picture
+                                            <span class="required">*</span>
+                                        </label>
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <input type="file" accept="image" name="profile_picture"/>
                                         </div>
                                     </div>
                                     <div class="ln_solid"></div>
@@ -528,6 +551,10 @@
     });
 </script>
 <!-- /Flot -->
+
+<!-- validation -->
+<script src="{% static "vendors/parsleyjs/dist/parsley.min.js" %}"></script>
+<!-- /validation -->
 
 <!-- jVectorMap -->
 <script src="{% static "js/maps/jquery-jvectormap-world-mill-en.js" %}"></script>
