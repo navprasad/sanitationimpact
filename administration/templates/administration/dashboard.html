@@ -1,449 +1,600 @@
 {% extends 'administration/root.html' %}
 
+{% load staticfiles %}
+
+{% block cssLinks %}
+    <link href="{% static "vendors/iCheck/skins/flat/green.css" %}" rel="stylesheet">
+{% endblock %}
+
 {% block pageContent %}
-<!-- page content -->
-<div class="right_col" role="main">
+    <!-- page content -->
 
-    <div class="">
-        <div class="page-title">
-            <div class="title_left">
-                <h3>User Profile</h3>
-            </div>
-
-            <div class="title_right">
-                <div class="col-md-5 col-sm-5 col-xs-12 form-group pull-right top_search">
-                    <div class="input-group">
-                        <input type="text" class="form-control" placeholder="Search for...">
-                    <span class="input-group-btn">
-                              <button class="btn btn-default" type="button">Go!</button>
-                          </span>
-                    </div>
+    <div class="right_col" role="main">
+        <div class="">
+            <div class="page-title">
+                <div class="title_left">
+                    <h3>{{ user.user.first_name }} {{ user.user.last_name }}</h3>
                 </div>
             </div>
-        </div>
-        <div class="clearfix"></div>
+            <div class="clearfix"></div>
 
-        <div class="row">
-            <div class="col-md-12 col-sm-12 col-xs-12">
-                <div class="x_panel">
-                    <div class="x_title">
-                        <h2>User Report
-                            <small>Activity report</small>
-                        </h2>
-                        <ul class="nav navbar-right panel_toolbox">
-                            <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
-                            </li>
-                            <li class="dropdown">
-                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button"
-                                   aria-expanded="false"><i class="fa fa-wrench"></i></a>
-                                <ul class="dropdown-menu" role="menu">
-                                    <li><a href="#">Settings 1</a>
-                                    </li>
-                                    <li><a href="#">Settings 2</a>
-                                    </li>
-                                </ul>
-                            </li>
-                            <li><a class="close-link"><i class="fa fa-close"></i></a>
-                            </li>
-                        </ul>
-                        <div class="clearfix"></div>
-                    </div>
-                    <div class="x_content">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="x_panel">
+                        <div class="x_content">
+                            <div class="col-md-9 col-sm-9 col-xs-12">
+                                <div id="mainb" style="height:500px;"></div>
+                            </div>
 
-                        <div class="col-md-3 col-sm-3 col-xs-12 profile_left">
+                            <!-- start project-detail sidebar -->
+                            <div class="col-md-3 col-sm-3 col-xs-12">
 
-                            <div class="profile_img">
+                                <section class="panel">
 
-                                <!-- end of image cropping -->
-                                <div id="crop-avatar">
-                                    <!-- Current avatar -->
-                                    <img class="img-responsive avatar-view" src="images/picture.jpg"
-                                         alt="Avatar" title="Change the avatar">
+                                    <div class="x_title">
+                                        <h2 style="padding-bottom: 7px; padding-top: 4px; width: 100%;"
+                                            class="text-center">User Profile</h2>
+                                        <div class="clearfix"></div>
+                                    </div>
+                                    <div class="panel-body">
+                                        <div class="row">
+                                            <div class="col-md-6 text-center">
+                                                <img style="border-radius: 20px; max-height: 150px; max-width: 100%;"
+                                                     src="/media/profile_images/agent-smith.jpg"/>
+                                            </div>
 
-                                    <!-- Cropping modal -->
-                                    <div class="modal fade" id="avatar-modal" aria-hidden="true"
-                                         aria-labelledby="avatar-modal-label" role="dialog" tabindex="-1">
-                                        <div class="modal-dialog modal-lg">
-                                            <div class="modal-content">
-                                                <form class="avatar-form" action="crop.php"
-                                                      enctype="multipart/form-data" method="post">
-                                                    <div class="modal-header">
-                                                        <button class="close" data-dismiss="modal"
-                                                                type="button">&times;</button>
-                                                        <h4 class="modal-title" id="avatar-modal-label">Change
-                                                            Avatar</h4>
-                                                    </div>
-                                                    <div class="modal-body">
-                                                        <div class="avatar-body">
+                                            <br/>
+                                            <div class="col-md-6">
+                                                <div class="project_detail">
+                                                    <p class="title">Phone Number</p>
+                                                    <p>9496847294</p>
+                                                    <p class="title">Address</p>
+                                                    <p>Some house, Some place, India</p>
+                                                </div>
+                                            </div>
+                                        </div>
 
-                                                            <!-- Upload image and data -->
-                                                            <div class="avatar-upload">
-                                                                <input class="avatar-src" name="avatar_src"
-                                                                       type="hidden">
-                                                                <input class="avatar-data" name="avatar_data"
-                                                                       type="hidden">
-                                                                <label for="avatarInput">Local upload</label>
-                                                                <input class="avatar-input" id="avatarInput"
-                                                                       name="avatar_file" type="file">
-                                                            </div>
+                                        <br/>
+                                    </div>
 
-                                                            <!-- Crop and preview -->
-                                                            <div class="row">
-                                                                <div class="col-md-9">
-                                                                    <div class="avatar-wrapper"></div>
-                                                                </div>
-                                                                <div class="col-md-3">
-                                                                    <div class="avatar-preview preview-lg"></div>
-                                                                    <div class="avatar-preview preview-md"></div>
-                                                                    <div class="avatar-preview preview-sm"></div>
-                                                                </div>
-                                                            </div>
-
-                                                            <div class="row avatar-btns">
-                                                                <div class="col-md-9">
-                                                                    <div class="btn-group">
-                                                                        <button class="btn btn-primary"
-                                                                                data-method="rotate"
-                                                                                data-option="-90" type="button"
-                                                                                title="Rotate -90 degrees">
-                                                                            Rotate Left
-                                                                        </button>
-                                                                        <button class="btn btn-primary"
-                                                                                data-method="rotate"
-                                                                                data-option="-15" type="button">
-                                                                            -15deg
-                                                                        </button>
-                                                                        <button class="btn btn-primary"
-                                                                                data-method="rotate"
-                                                                                data-option="-30" type="button">
-                                                                            -30deg
-                                                                        </button>
-                                                                        <button class="btn btn-primary"
-                                                                                data-method="rotate"
-                                                                                data-option="-45" type="button">
-                                                                            -45deg
-                                                                        </button>
-                                                                    </div>
-                                                                    <div class="btn-group">
-                                                                        <button class="btn btn-primary"
-                                                                                data-method="rotate"
-                                                                                data-option="90" type="button"
-                                                                                title="Rotate 90 degrees">Rotate
-                                                                            Right
-                                                                        </button>
-                                                                        <button class="btn btn-primary"
-                                                                                data-method="rotate"
-                                                                                data-option="15" type="button">
-                                                                            15deg
-                                                                        </button>
-                                                                        <button class="btn btn-primary"
-                                                                                data-method="rotate"
-                                                                                data-option="30" type="button">
-                                                                            30deg
-                                                                        </button>
-                                                                        <button class="btn btn-primary"
-                                                                                data-method="rotate"
-                                                                                data-option="45" type="button">
-                                                                            45deg
-                                                                        </button>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="col-md-3">
-                                                                    <button class="btn btn-primary btn-block avatar-save"
-                                                                            type="submit">Done
-                                                                    </button>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <!-- <div class="modal-footer">
-                                                                      <button class="btn btn-default" data-dismiss="modal" type="button">Close</button>
-                                                                    </div> -->
-                                                </form>
+                                </section>
+                                <section>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="text-center tile-stats">
+                                                <div class="count text-muted">179</div>
+                                                <h3><span class="text-success">Resolved</span></h3>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="text-center tile-stats">
+                                                <div class="count text-muted">24</div>
+                                                <h3><span class="text-danger">Unresolved</span></h3>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="text-center tile-stats">
+                                                <div class="count text-muted">203</div>
+                                                <h3><span class="text-primary">Total</span></h3>
                                             </div>
                                         </div>
                                     </div>
-                                    <!-- /.modal -->
-
-                                    <!-- Loading state -->
-                                    <div class="loading" aria-label="Loading" role="img" tabindex="-1"></div>
-                                </div>
-                                <!-- end of image cropping -->
+                                </section>
 
                             </div>
-                            <h3>Samuel Doe</h3>
-
-                            <ul class="list-unstyled user_data">
-                                <li><i class="fa fa-map-marker user-profile-icon"></i> San Francisco,
-                                    California, USA
-                                </li>
-
-                                <li>
-                                    <i class="fa fa-briefcase user-profile-icon"></i> Software Engineer
-                                </li>
-
-                                <li class="m-top-xs">
-                                    <i class="fa fa-external-link user-profile-icon"></i>
-                                    <a href="http://www.kimlabs.com/profile/"
-                                       target="_blank">www.kimlabs.com</a>
-                                </li>
-                            </ul>
-
-                            <a class="btn btn-success"><i class="fa fa-edit m-right-xs"></i>Edit Profile</a>
-                            <br/>
-
-                            <!-- start skills -->
-                            <h4>Skills</h4>
-                            <ul class="list-unstyled user_data">
-                                <li>
-                                    <p>Web Applications</p>
-                                    <div class="progress progress_sm">
-                                        <div class="progress-bar bg-green" role="progressbar"
-                                             data-transitiongoal="50"></div>
-                                    </div>
-                                </li>
-                                <li>
-                                    <p>Website Design</p>
-                                    <div class="progress progress_sm">
-                                        <div class="progress-bar bg-green" role="progressbar"
-                                             data-transitiongoal="70"></div>
-                                    </div>
-                                </li>
-                                <li>
-                                    <p>Automation & Testing</p>
-                                    <div class="progress progress_sm">
-                                        <div class="progress-bar bg-green" role="progressbar"
-                                             data-transitiongoal="30"></div>
-                                    </div>
-                                </li>
-                                <li>
-                                    <p>UI / UX</p>
-                                    <div class="progress progress_sm">
-                                        <div class="progress-bar bg-green" role="progressbar"
-                                             data-transitiongoal="50"></div>
-                                    </div>
-                                </li>
-                            </ul>
-                            <!-- end of skills -->
+                            <!-- end project-detail sidebar -->
 
                         </div>
-                        <div class="col-md-9 col-sm-9 col-xs-12">
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="x_panel">
+                        <div class="x_content">
+                            <div class="col-md-9" style="padding-right: 25px;">
+                                <!-- page content -->
+                                <div>
 
-                            <div class="profile_title">
-                                <div class="col-md-6">
-                                    <h2>User Activity Report</h2>
-                                </div>
-                                <div class="col-md-6">
-                                    <div id="reportrange" class="pull-right"
-                                         style="margin-top: 5px; background: #fff; cursor: pointer; padding: 5px 10px; border: 1px solid #E6E9ED">
-                                        <i class="glyphicon glyphicon-calendar fa fa-calendar"></i>
-                                        <span>December 30, 2014 - January 28, 2015</span> <b class="caret"></b>
+                                    <div class="">
+                                        <div class="page-title">
+                                            <div class="title_left"><h3>Tickets</h3></div>
+
+                                            <div class="title_right">
+                                                <div class="col-md-5 col-sm-5 col-xs-12 form-group pull-right top_search">
+                                                    <div class="input-group">
+                                                        <input type="text" class="form-control"
+                                                               placeholder="Search for...">
+                                                        <span class="input-group-btn">
+                                                            <button class="btn btn-default" type="button">Go!</button>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="clearfix"></div>
+
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <div class="x_panel">
+                                                    <div class="x_content">
+                                                        <!-- start project list -->
+                                                        <table class="table table-striped projects">
+                                                            <thead>
+                                                            <tr>
+                                                                <th style="width: 1%">#</th>
+                                                                <th>Ticket ID</th>
+                                                                <th class="text-center">Created Date</th>
+                                                                <th>Toilet Address</th>
+                                                                <th>Problem</th>
+                                                                <th class="text-center">Recording</th>
+                                                                <th class="text-center">Status</th>
+                                                                <th class="text-center">Resolved Date</th>
+                                                            </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                            <tr>
+                                                                <td>#</td>
+                                                                <td>
+                                                                    <a>1</a>
+                                                                </td>
+                                                                <td class="text-center">
+                                                                    01.01.2016
+                                                                </td>
+                                                                <td>
+                                                                    Toilet number 2, Somebody's complex, Ambedkar colony
+                                                                </td>
+                                                                <td>
+                                                                    Unclean toilet
+                                                                </td>
+                                                                <td class="text-center">
+                                                                    <span class="glyphicon glyphicon-download"
+                                                                          style="font-size: 25px"/>
+                                                                </td>
+                                                                <td class="text-center">
+                                                                    <button type="button"
+                                                                            class="btn btn-danger btn-xs">Unresolved
+                                                                    </button>
+                                                                </td>
+                                                                <td>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>#</td>
+                                                                <td>
+                                                                    <a>2</a>
+                                                                </td>
+                                                                <td class="text-center">
+                                                                    01.01.2016
+                                                                </td>
+                                                                <td>
+                                                                    Toilet number 2, Somebody's complex, Ambedkar colony
+                                                                </td>
+                                                                <td>
+                                                                    No electricity
+                                                                </td>
+                                                                <td class="text-center">
+                                                                    <span class="glyphicon glyphicon-download"
+                                                                          style="font-size: 25px"/>
+                                                                </td>
+                                                                <td class="text-center">
+                                                                    <button type="button"
+                                                                            class="btn btn-success btn-xs">Resolved
+                                                                    </button>
+                                                                </td>
+                                                                <td class="text-center">
+                                                                    01.01.2016
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>#</td>
+                                                                <td>
+                                                                    <a>3</a>
+                                                                </td>
+                                                                <td class="text-center">
+                                                                    01.01.2016
+                                                                </td>
+                                                                <td>
+                                                                    Toilet number 2, Somebody's complex, Ambedkar colony
+                                                                </td>
+                                                                <td>
+                                                                    No water
+                                                                </td>
+                                                                <td class="text-center">
+                                                                    <span class="glyphicon glyphicon-download"
+                                                                          style="font-size: 25px"/>
+                                                                </td>
+                                                                <td class="text-center">
+                                                                    <button type="button"
+                                                                            class="btn btn-success btn-xs">Resolved
+                                                                    </button>
+                                                                </td>
+                                                                <td class="text-center">
+                                                                    01.01.2016
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>#</td>
+                                                                <td>
+                                                                    <a>4</a>
+                                                                </td>
+                                                                <td class="text-center">
+                                                                    01.01.2016
+                                                                </td>
+                                                                <td>
+                                                                    Toilet number 2, Somebody's complex, Ambedkar colony
+                                                                </td>
+                                                                <td>
+                                                                    Unclean toilet
+                                                                </td>
+                                                                <td class="text-center">
+                                                                    <span class="glyphicon glyphicon-download"
+                                                                          style="font-size: 25px"/>
+                                                                </td>
+                                                                <td class="text-center">
+                                                                    <button type="button"
+                                                                            class="btn btn-success btn-xs">Resolved
+                                                                    </button>
+                                                                </td>
+                                                                <td class="text-center">
+                                                                    01.01.2016
+                                                                </td>
+                                                            </tr>
+                                                            </tbody>
+                                                        </table>
+                                                        <!-- end project list -->
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
+                                <!-- /page content -->
                             </div>
-                            <!-- start of user-activity-graph -->
-                            <div id="graph_bar" style="width:100%; height:280px;"></div>
-                            <!-- end of user-activity-graph -->
-
-                            <div class="" role="tabpanel" data-example-id="togglable-tabs">
-                                <ul id="myTab" class="nav nav-tabs bar_tabs" role="tablist">
-                                    <li role="presentation" class="active"><a href="#tab_content1" id="home-tab"
-                                                                              role="tab" data-toggle="tab"
-                                                                              aria-expanded="true">Recent
-                                        Activity</a>
-                                    </li>
-                                    <li role="presentation" class=""><a href="#tab_content2" role="tab"
-                                                                        id="profile-tab" data-toggle="tab"
-                                                                        aria-expanded="false">Projects Worked
-                                        on</a>
-                                    </li>
-                                    <li role="presentation" class=""><a href="#tab_content3" role="tab"
-                                                                        id="profile-tab2" data-toggle="tab"
-                                                                        aria-expanded="false">Profile</a>
-                                    </li>
-                                </ul>
-                                <div id="myTabContent" class="tab-content">
-                                    <div role="tabpanel" class="tab-pane fade active in" id="tab_content1"
-                                         aria-labelledby="home-tab">
-
-                                        <!-- start recent activity -->
-                                        <ul class="messages">
+                            <!-- new messaging-->
+                            <div class="col-md-3" style="padding-left: 25px;">
+                                <div class="x_panel">
+                                    <div class="x_title">
+                                        <h2>Messages</h2>
+                                        <div class="clearfix"></div>
+                                    </div>
+                                    <div class="x_content">
+                                        <ul class="list-unstyled msg_list">
                                             <li>
-                                                <img src="images/img.jpg" class="avatar" alt="Avatar">
-                                                <div class="message_date">
-                                                    <h3 class="date text-info">24</h3>
-                                                    <p class="month">May</p>
-                                                </div>
-                                                <div class="message_wrapper">
-                                                    <h4 class="heading">Desmond Davison</h4>
-                                                    <blockquote class="message">Raw denim you probably haven't
-                                                        heard of them jean shorts Austin. Nesciunt tofu
-                                                        stumptown aliqua butcher retro keffiyeh dreamcatcher
-                                                        synth.
-                                                    </blockquote>
-                                                    <br/>
-                                                    <p class="url">
-                                                                <span class="fs1 text-info" aria-hidden="true"
-                                                                      data-icon=""></span>
-                                                        <a href="#"><i class="fa fa-paperclip"></i> User
-                                                            Acceptance Test.doc </a>
-                                                    </p>
-                                                </div>
+                                                <a>
+                        <span class="image">
+                          <img src="/media/profile_images/administrator.jpg" style="height: 35px;" alt="img"/>
+                        </span>
+                        <span>
+                          <span>V</span>
+                          <span class="time">3 mins ago</span>
+                        </span>
+                        <span class="message">
+                          Film festivals used to be do-or-die moments for movie makers. They were where you met the producers that
+                        </span>
+                                                </a>
                                             </li>
                                             <li>
-                                                <img src="images/img.jpg" class="avatar" alt="Avatar">
-                                                <div class="message_date">
-                                                    <h3 class="date text-error">21</h3>
-                                                    <p class="month">May</p>
-                                                </div>
-                                                <div class="message_wrapper">
-                                                    <h4 class="heading">Brian Michaels</h4>
-                                                    <blockquote class="message">Raw denim you probably haven't
-                                                        heard of them jean shorts Austin. Nesciunt tofu
-                                                        stumptown aliqua butcher retro keffiyeh dreamcatcher
-                                                        synth.
-                                                    </blockquote>
-                                                    <br/>
-                                                    <p class="url">
-                                                                <span class="fs1" aria-hidden="true"
-                                                                      data-icon=""></span>
-                                                        <a href="#" data-original-title="">Download</a>
-                                                    </p>
-                                                </div>
+                                                <a>
+                        <span class="image">
+                          <img src="/media/profile_images/provider.png" style="height: 35px;" alt="img"/>
+                        </span>
+                        <span>
+                          <span>Obama</span>
+                          <span class="time">3 mins ago</span>
+                        </span>
+                        <span class="message">
+                          Film festivals used to be do-or-die moments for movie makers. They were where you met the producers that
+                        </span>
+                                                </a>
                                             </li>
                                             <li>
-                                                <img src="images/img.jpg" class="avatar" alt="Avatar">
-                                                <div class="message_date">
-                                                    <h3 class="date text-info">24</h3>
-                                                    <p class="month">May</p>
-                                                </div>
-                                                <div class="message_wrapper">
-                                                    <h4 class="heading">Desmond Davison</h4>
-                                                    <blockquote class="message">Raw denim you probably haven't
-                                                        heard of them jean shorts Austin. Nesciunt tofu
-                                                        stumptown aliqua butcher retro keffiyeh dreamcatcher
-                                                        synth.
-                                                    </blockquote>
-                                                    <br/>
-                                                    <p class="url">
-                                                                <span class="fs1 text-info" aria-hidden="true"
-                                                                      data-icon=""></span>
-                                                        <a href="#"><i class="fa fa-paperclip"></i> User
-                                                            Acceptance Test.doc </a>
-                                                    </p>
-                                                </div>
+                                                <a>
+                        <span class="image">
+                          <img src="/media/profile_images/agent-smith.jpg" style="height: 35px;" alt="img"/>
+                        </span>
+                        <span>
+                          <span>Agent Smith</span>
+                          <span class="time">3 mins ago</span>
+                        </span>
+                        <span class="message">
+                          Film festivals used to be do-or-die moments for movie makers. They were where you met the producers that
+                        </span>
+                                                </a>
                                             </li>
-                                            <li>
-                                                <img src="images/img.jpg" class="avatar" alt="Avatar">
-                                                <div class="message_date">
-                                                    <h3 class="date text-error">21</h3>
-                                                    <p class="month">May</p>
-                                                </div>
-                                                <div class="message_wrapper">
-                                                    <h4 class="heading">Brian Michaels</h4>
-                                                    <blockquote class="message">Raw denim you probably haven't
-                                                        heard of them jean shorts Austin. Nesciunt tofu
-                                                        stumptown aliqua butcher retro keffiyeh dreamcatcher
-                                                        synth.
-                                                    </blockquote>
-                                                    <br/>
-                                                    <p class="url">
-                                                                <span class="fs1" aria-hidden="true"
-                                                                      data-icon=""></span>
-                                                        <a href="#" data-original-title="">Download</a>
-                                                    </p>
-                                                </div>
-                                            </li>
-
                                         </ul>
-                                        <!-- end recent activity -->
-
-                                    </div>
-                                    <div role="tabpanel" class="tab-pane fade" id="tab_content2"
-                                         aria-labelledby="profile-tab">
-
-                                        <!-- start user projects -->
-                                        <table class="data table table-striped no-margin">
-                                            <thead>
-                                            <tr>
-                                                <th>#</th>
-                                                <th>Project Name</th>
-                                                <th>Client Company</th>
-                                                <th class="hidden-phone">Hours Spent</th>
-                                                <th>Contribution</th>
-                                            </tr>
-                                            </thead>
-                                            <tbody>
-                                            <tr>
-                                                <td>1</td>
-                                                <td>New Company Takeover Review</td>
-                                                <td>Deveint Inc</td>
-                                                <td class="hidden-phone">18</td>
-                                                <td class="vertical-align-mid">
-                                                    <div class="progress">
-                                                        <div class="progress-bar progress-bar-success"
-                                                             data-transitiongoal="35"></div>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>2</td>
-                                                <td>New Partner Contracts Consultanci</td>
-                                                <td>Deveint Inc</td>
-                                                <td class="hidden-phone">13</td>
-                                                <td class="vertical-align-mid">
-                                                    <div class="progress">
-                                                        <div class="progress-bar progress-bar-danger"
-                                                             data-transitiongoal="15"></div>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>3</td>
-                                                <td>Partners and Inverstors report</td>
-                                                <td>Deveint Inc</td>
-                                                <td class="hidden-phone">30</td>
-                                                <td class="vertical-align-mid">
-                                                    <div class="progress">
-                                                        <div class="progress-bar progress-bar-success"
-                                                             data-transitiongoal="45"></div>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>4</td>
-                                                <td>New Company Takeover Review</td>
-                                                <td>Deveint Inc</td>
-                                                <td class="hidden-phone">28</td>
-                                                <td class="vertical-align-mid">
-                                                    <div class="progress">
-                                                        <div class="progress-bar progress-bar-success"
-                                                             data-transitiongoal="75"></div>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                            </tbody>
-                                        </table>
-                                        <!-- end user projects -->
-
-                                    </div>
-                                    <div role="tabpanel" class="tab-pane fade" id="tab_content3"
-                                         aria-labelledby="profile-tab">
-                                        <p>xxFood truck fixie locavore, accusamus mcsweeney's marfa nulla
-                                            single-origin coffee squid. Exercitation +1 labore velit, blog
-                                            sartorial PBR leggings next level wes anderson artisan four loko
-                                            farm-to-table craft beer twee. Qui
-                                            photo booth letterpress, commodo enim craft beer mlkshk </p>
                                     </div>
                                 </div>
+
                             </div>
+
+                            <!-- over -->
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
-<!-- /page content -->
+    <!-- /page content -->
+
+{% endblock %}
+
+{% block jsLinks %}
+    <!-- FastClick -->
+    <script src="{% static "vendors/fastclick/lib/fastclick.js" %}"></script>
+    <!-- NProgress -->
+    <script src="{% static "vendors/nprogress/nprogress.js" %}"></script>
+    <!-- ECharts -->
+    <script src="{% static "vendors/echarts/dist/echarts.min.js" %}"></script>
+    <!-- ECharts -->
+    <script>
+        var theme = {
+            color: [
+                '#26B99A', '#ff5050', '#BDC3C7', '#3498DB',
+                '#9B59B6', '#8abb6f', '#759c6a', '#bfd3b7'
+            ],
+
+            title: {
+                itemGap: 8,
+                textStyle: {
+                    fontWeight: 'normal',
+                    color: '#408829'
+                }
+            },
+
+            dataRange: {
+                color: ['#1f610a', '#97b58d']
+            },
+
+            toolbox: {
+                color: ['#408829', '#408829', '#408829', '#408829']
+            },
+
+            tooltip: {
+                backgroundColor: 'rgba(0,0,0,0.5)',
+                axisPointer: {
+                    type: 'line',
+                    lineStyle: {
+                        color: '#408829',
+                        type: 'dashed'
+                    },
+                    crossStyle: {
+                        color: '#408829'
+                    },
+                    shadowStyle: {
+                        color: 'rgba(200,200,200,0.3)'
+                    }
+                }
+            },
+
+            dataZoom: {
+                dataBackgroundColor: '#eee',
+                fillerColor: 'rgba(64,136,41,0.2)',
+                handleColor: '#408829'
+            },
+            grid: {
+                borderWidth: 0
+            },
+
+            categoryAxis: {
+                axisLine: {
+                    lineStyle: {
+                        color: '#408829'
+                    }
+                },
+                splitLine: {
+                    lineStyle: {
+                        color: ['#eee']
+                    }
+                }
+            },
+
+            valueAxis: {
+                axisLine: {
+                    lineStyle: {
+                        color: '#408829'
+                    }
+                },
+                splitArea: {
+                    show: true,
+                    areaStyle: {
+                        color: ['rgba(250,250,250,0.1)', 'rgba(200,200,200,0.1)']
+                    }
+                },
+                splitLine: {
+                    lineStyle: {
+                        color: ['#eee']
+                    }
+                }
+            },
+            timeline: {
+                lineStyle: {
+                    color: '#408829'
+                },
+                controlStyle: {
+                    normal: {color: '#408829'},
+                    emphasis: {color: '#408829'}
+                }
+            },
+
+            k: {
+                itemStyle: {
+                    normal: {
+                        color: '#68a54a',
+                        color0: '#a9cba2',
+                        lineStyle: {
+                            width: 1,
+                            color: '#408829',
+                            color0: '#86b379'
+                        }
+                    }
+                }
+            },
+            map: {
+                itemStyle: {
+                    normal: {
+                        areaStyle: {
+                            color: '#ddd'
+                        },
+                        label: {
+                            textStyle: {
+                                color: '#c12e34'
+                            }
+                        }
+                    },
+                    emphasis: {
+                        areaStyle: {
+                            color: '#99d2dd'
+                        },
+                        label: {
+                            textStyle: {
+                                color: '#c12e34'
+                            }
+                        }
+                    }
+                }
+            },
+            force: {
+                itemStyle: {
+                    normal: {
+                        linkStyle: {
+                            strokeColor: '#408829'
+                        }
+                    }
+                }
+            },
+            chord: {
+                padding: 4,
+                itemStyle: {
+                    normal: {
+                        lineStyle: {
+                            width: 1,
+                            color: 'rgba(128, 128, 128, 0.5)'
+                        },
+                        chordStyle: {
+                            lineStyle: {
+                                width: 1,
+                                color: 'rgba(128, 128, 128, 0.5)'
+                            }
+                        }
+                    },
+                    emphasis: {
+                        lineStyle: {
+                            width: 1,
+                            color: 'rgba(128, 128, 128, 0.5)'
+                        },
+                        chordStyle: {
+                            lineStyle: {
+                                width: 1,
+                                color: 'rgba(128, 128, 128, 0.5)'
+                            }
+                        }
+                    }
+                }
+            },
+            gauge: {
+                startAngle: 225,
+                endAngle: -45,
+                axisLine: {
+                    show: true,
+                    lineStyle: {
+                        color: [[0.2, '#86b379'], [0.8, '#68a54a'], [1, '#408829']],
+                        width: 8
+                    }
+                },
+                axisTick: {
+                    splitNumber: 10,
+                    length: 12,
+                    lineStyle: {
+                        color: 'auto'
+                    }
+                },
+                axisLabel: {
+                    textStyle: {
+                        color: 'auto'
+                    }
+                },
+                splitLine: {
+                    length: 18,
+                    lineStyle: {
+                        color: 'auto'
+                    }
+                },
+                pointer: {
+                    length: '90%',
+                    color: 'auto'
+                },
+                title: {
+                    textStyle: {
+                        color: '#333'
+                    }
+                },
+                detail: {
+                    textStyle: {
+                        color: 'auto'
+                    }
+                }
+            },
+            textStyle: {
+                fontFamily: 'Arial, Verdana, sans-serif'
+            }
+        };
+
+        var echartBarLine = echarts.init(document.getElementById('mainb'), theme);
+
+        echartBarLine.setOption({
+            title: {
+                x: 'center',
+                y: 'top',
+                padding: [12, 0, 20, 0],
+                text: 'Toilets Stats: Resolved vs Unresolved vs Time',
+                textStyle: {
+                    fontSize: 15,
+                    fontWeight: 'normal'
+                }
+            },
+            tooltip: {
+                trigger: 'axis'
+            },
+            toolbox: {
+                padding: [0, 110, 0, 0],
+                show: true,
+                feature: {
+                    saveAsImage: {
+                        show: true,
+                        title: 'Save'
+                    }
+                }
+            },
+            calculable: true,
+            legend: {
+                data: ['Resolved', 'Unresolved'],
+                y: 'bottom'
+            },
+            xAxis: [{
+                type: 'category',
+                data: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+            }],
+            yAxis: [{
+                type: 'value',
+                name: 'Number of Toilets',
+                axisLabel: {
+                    formatter: '{value}'
+                }
+            }],
+            series: [{
+                name: 'Resolved',
+                type: 'bar',
+                data: [2.0, 4.0, 7.0, 23.0, 25.0, 76.0, 135.0, 162.0, 32.0, 20.0, 6.0, 3.0]
+            }, {
+                name: 'Unresolved',
+                type: 'bar',
+                data: [2.0, 5.0, 9.0, 26.0, 28.0, 70.0, 175.0, 182.0, 48.0, 18.0, 6.0, 2.0]
+            }]
+        });
+    </script>
+    <!-- /ECharts -->
+
 {% endblock %}
 
