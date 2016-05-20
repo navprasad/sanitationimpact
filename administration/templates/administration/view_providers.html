@@ -4,10 +4,10 @@
     <!-- page content -->
     <div class="right_col" role="main">
 
-        <div>
+        <div class="">
             <div class="page-title">
                 <div class="title_left">
-                    <h3>Managers</h3>
+                    <h3>Providers</h3>
                 </div>
 
                 <div class="title_right">
@@ -32,22 +32,22 @@
                                 <div class="col-md-12 col-sm-12 col-xs-12 text-center"></div>
                                 <div class="clearfix"></div>
 
-                                {% for manager in managers %}
+                                {% for provider in providers %}
                                     <div class="col-md-4 col-sm-4 col-xs-12 profile_details">
                                         <div class="well profile_view">
                                             <div class="col-sm-12">
                                                 <div class="left col-xs-7">
-                                                    <h2>{{ manager.user_profile.user.first_name }}
-                                                        {{ manager.user_profile.user.last_name }}</h2>
+                                                    <h2>{{ provider.user_profile.user.first_name }}
+                                                        {{ provider.user_profile.user.last_name }}</h2>
                                                     <ul class="list-unstyled">
                                                         <li><i class="fa fa-building"></i> Address:</li>
-                                                        {{ manager.user_profile.address }}
+                                                        {{ provider.user_profile.address }}
                                                         <li><i class="fa fa-phone"></i> Phone #:</li>
-                                                        {{ manager.user_profile.phone_number }}
+                                                        {{ provider.user_profile.phone_number }}
                                                     </ul>
                                                 </div>
                                                 <div class="right col-xs-5 text-center">
-                                                    <img width="100%" src="/media/{{ manager.user_profile.picture }}"
+                                                    <img width="100%" src="/media/{{ provider.user_profile.picture }}"
                                                          alt="profile picture" class="profile_image"/>
                                                 </div>
                                             </div>
@@ -63,14 +63,13 @@
                                                     </p>
                                                 </div>
                                                 <div class="col-xs-12 col-sm-6 emphasis">
-                                                    <button type="button" class="btn btn-success pull-right btn-xs">
-                                                        <i class="fa fa-user"></i> <i class="fa fa-comments-o"></i>
-                                                    </button>
-                                                    <a href="/administration/view_manager/{{ manager.pk }}/"
-                                                       type="button"
-                                                       class="btn btn-primary btn-xs pull-right">
+                                                    <button type="button" class="btn btn-success pull-right
+                                                        btn-xs"><i
+                                                            class="fa fa-user">
+                                                    </i> <i class="fa fa-comments-o"></i></button>
+                                                    <button type="button" class="btn btn-primary btn-xs pull-right">
                                                         <i class="fa fa-user"> </i> View Profile
-                                                    </a>
+                                                    </button>
                                                 </div>
                                             </div>
                                         </div>

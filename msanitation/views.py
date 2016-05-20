@@ -7,6 +7,7 @@ from django.utils.decorators import method_decorator
 from django.contrib.auth import logout
 
 from administration.models import UserProfile
+from manager.models import Manager
 
 
 class Login(View):
@@ -49,7 +50,8 @@ class DashBoard(View):
         if user.type == 'A':
             return render(request, 'administration/dashboard.html', {'user': user})
         elif user.type == 'M':
-            return render(request, 'manager/dashboard.html')
+            manager = Manager.objects.get(user_profile=user)
+            return render(request, 'manager/dashboard.html', {'user': user, 'manager': manager})
         elif user.type == 'P':
             return render(request, 'provider/dashboard.html')
         return HttpResponse("Invalid User")

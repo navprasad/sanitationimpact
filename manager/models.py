@@ -3,7 +3,7 @@ from administration.models import UserProfile
 
 
 class Manager(models.Model):
-    user_profile = models.OneToOneField(UserProfile, default=None, null=True)
+    user_profile = models.OneToOneField(UserProfile, on_delete=models.CASCADE)
 
     def delete(self, *args, **kwargs):
         self.user_profile.delete()

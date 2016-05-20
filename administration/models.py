@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.db.models.signals import post_save
+from django.dispatch.dispatcher import receiver
 
 
 class UserProfile(models.Model):
@@ -9,11 +11,11 @@ class UserProfile(models.Model):
         ('P', 'PROVIDER')
     )
 
-    user = models.OneToOneField(User)
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     picture = models.ImageField(upload_to='profile_images', blank=True)
     phone_number = models.CharField(max_length=20, null=True)
     address = models.TextField(null=True)
-    type = models.CharField(max_length=1, choices=TYPE_CHOICES)
+    type = models.CharField(max_length=1, choices=TYPE_CHOICES, default='P')
 
     def delete(self, *args, **kwargs):
         self.user.delete()
@@ -21,6 +23,13 @@ class UserProfile(models.Model):
 
     def __unicode__(self):
         return self.user.username
+
+
+@receiver(post_save, sender=User)
+def create_user_profile(sender, **kwargs):
+    instance = kwargs['instance']
+    if kwargs['created']:  # create
+        UserProfile.objects.get_or_create(user=instance)
 
 
 class Admin(models.Model):

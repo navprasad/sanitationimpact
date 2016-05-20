@@ -13,7 +13,7 @@
         <div class="">
             <div class="page-title">
                 <div class="title_left">
-                    <h3>{{ user.user.first_name }} {{ user.user.last_name }}</h3>
+                    <h3>{{ manager.user_profile.user.first_name }} {{ manager.user_profile.user.last_name }}</h3>
                 </div>
             </div>
             <div class="clearfix"></div>
@@ -40,16 +40,16 @@
                                         <div class="row">
                                             <div class="col-md-6 text-center">
                                                 <img style="border-radius: 20px; max-height: 150px; max-width: 100%;"
-                                                     src="/media/{{ user.picture }}"/>
+                                                     src="/media/{{ manager.user_profile.picture }}"/>
                                             </div>
 
                                             <br/>
                                             <div class="col-md-6">
                                                 <div class="project_detail">
                                                     <p class="title">Phone Number</p>
-                                                    <p>{{ user.phone_number }}</p>
+                                                    <p>{{ manager.user_profile.phone_number }}</p>
                                                     <p class="title">Address</p>
-                                                    <p>{{ user.address }}</p>
+                                                    <p>{{ manager.user_profile.address }}</p>
                                                 </div>
                                             </div>
                                         </div>
