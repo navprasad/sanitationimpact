@@ -5,7 +5,7 @@ from manager.models import Manager
 
 
 class Provider(models.Model):
-    user_profile = models.OneToOneField(UserProfile, default=None, null=True)
+    user_profile = models.OneToOneField(UserProfile)
 
     provider_id = models.CharField(max_length=100, unique=True, db_index=True)
     pin_code = models.CharField(max_length=10)

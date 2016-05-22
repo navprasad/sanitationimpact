@@ -15,4 +15,3 @@ class ManagerProfile(View):
     def get(self, request, pk):
         manager = Manager.objects.get(pk=pk)
         return render(request, 'administration/profile.html', {'user': manager})
-

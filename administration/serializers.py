@@ -44,7 +44,6 @@ class AddProviderSerializer(serializers.Serializer):
     address = serializers.CharField()
     manager = serializers.RelatedField(queryset=Manager.objects.all())
 
-
     # manager = models.ForeignKey(Manager, on_delete=models.CASCADE)
     # toilets = models.ManyToManyField(Toilet, related_name='providers')
     # problems = models.ManyToManyField(Problem, related_name='providers')

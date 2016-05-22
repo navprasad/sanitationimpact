@@ -17,6 +17,7 @@ class Ticket(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True, db_index=True)
     toilet = models.ForeignKey(Toilet, related_name='tickets')
     problem = models.ForeignKey(Problem, related_name='tickets')
+    provider = models.ForeignKey(Provider, related_name='tickets', null=True)
     status = models.IntegerField(default=UNRESOLVED)
 
     def __unicode__(self):
@@ -25,5 +26,5 @@ class Ticket(models.Model):
 
 class Recording(models.Model):
     filename = models.CharField(max_length=255)
-    provider = models.ForeignKey(Provider)
+    provider = models.ForeignKey(Provider, null=True)
     ticket = models.ForeignKey(Ticket)

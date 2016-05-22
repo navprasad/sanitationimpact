@@ -74,4 +74,3 @@ class Toilet(models.Model):
 
     def __unicode__(self):
         return str(self.toilet_id) + ': ' + self.address
-

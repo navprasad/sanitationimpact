@@ -8,12 +8,11 @@ from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.decorators import detail_route
 
-from administration.forms import ToiletForm, UserForm, TicketForm, ProblemForm, UserProfileForm
+from administration.forms import UserProfileForm
 from administration.models import Admin, ProblemCategory, Problem, Toilet, UserProfile
 from administration.serializers import AdminSerializer, ProblemCategorySerializer, ProblemSerializer, \
-    ToiletSerializer, AddManagerSerializer, AddProviderSerializer
+    ToiletSerializer, AddManagerSerializer
 from manager.models import Manager
-from provider.models import Provider
 
 
 class AdminViewSet(viewsets.ModelViewSet):
@@ -42,40 +41,9 @@ class ToiletViewSet(viewsets.ModelViewSet):
     serializer_class = ToiletSerializer
 
 
-class TicketView(View):
-    def get(self, request):
-        ticket_form = TicketForm()
-        return render(request, 'administration/tickets.html', {'ticket_form': ticket_form, 'active': 'ticket'})
-
-    def post(self, request):
-        return Response({'success': True})
-
-
-class UserView(View):
-    def get(self, request):
-        user_form = UserForm()
-        return render(request, 'administration/base.html', {'user_form': user_form, 'active': 'user'})
-
-    def post(self, request):
-        return Response({'success': True})
-
-
-class ToiletView(View):
-    def get(self, request):
-        toilet_form = ToiletForm()
-        return render(request, 'administration/toilets.html', {'toilet_form': toilet_form, 'active': 'toilet'})
-
-    def post(self, request):
-        return Response({'success': True})
-
-
-class ProblemView(View):
-    def get(self, request):
-        problem_form = ProblemForm()
-        return render(request, 'administration/problems.html', {'problem_form': problem_form, 'active': 'problem'})
-
-    def post(self, request):
-        return Response({'success': True})
+"""
+Begin: Views for managing managers
+"""
 
 
 class ViewManagers(View):
@@ -164,54 +132,6 @@ class DeleteManager(View):
             pass
         return HttpResponseRedirect(reverse('view_managers'))
 
-
-class ViewProviders(View):
-    def get(self, request):
-        user = UserProfile.objects.get(user=request.user)
-        providers = Provider.objects.all()
-        return render(request, 'administration/view_providers.html', {'user': user, 'providers': providers})
-
-
-class AddProvider(View):
-    def get(self, request):
-        managers = Manager.objects.all()
-        user = UserProfile.objects.get(user=request.user)
-        return render(request, 'administration/add_provider.html', {'user': user, 'managers': managers})
-
-    @transaction.atomic()
-    def post(self, request):
-        user = UserProfile.objects.get(user=request.user)
-        serializer = AddProviderSerializer(data=request.POST)
-        if not serializer.is_valid():
-            return render(request, 'administration/add_provider.html', {'user': user, 'error': 'Please enable JavaScript'})
-        first_name = serializer.validated_data['first_name']
-        last_name = serializer.validated_data['last_name']
-        provider_id = serializer.validated_data['provider_id']
-        pin_code = serializer.validated_data['pin_code']
-        username = provider_id
-        password = pin_code
-        if not password:
-            password = '123456'
-        email = serializer.validated_data['email']
-        if not email:
-            email = username + "@example.com"
-        phone_number = serializer.validated_data['phone_number']
-        address = serializer.validated_data['address']
-
-        if request.FILES:
-            picture = request.FILES['picture']
-        else:
-            picture = None
-
-        manager = Manager.objects.get(pk=manager)
-
-        user = User.objects.create_user(first_name=first_name, last_name=last_name, username=username,
-                                        password=password, email=email)
-        user_profile = UserProfile(user=user, phone_number=phone_number, type='P', address=address, picture=picture)
-        user_profile.save()
-        provider = Provider(user_profile=user_profile, provider_id=provider_id, pin_code=pin_code, manager=manager)
-        provider.save()
-        # add toilets to provider
-        # add problems to provider
-
-        return HttpResponseRedirect("/provider/%d/" % provider.id)
+"""
+End: Views for managing managers
+"""

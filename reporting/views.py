@@ -180,5 +180,5 @@ class GetAudioURL(APIView):
         if not os.path.isfile(full_file_path):
             return Response({'success': False, 'error': "Audio file does not exist"})
 
-        audio_file_url = '/media/ticket_audio_files/'+file_name
+        audio_file_url = '/media/ticket_audio_files/' + file_name
         return Response({'success': True, 'audio_file_url': audio_file_url})

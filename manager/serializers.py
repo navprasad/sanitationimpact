@@ -6,5 +6,3 @@ from manager.models import Manager
 class ManagerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Manager
-
-
