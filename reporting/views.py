@@ -8,6 +8,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from administration.models import Toilet, Problem
+from manager.models import Manager
 from provider.models import Provider
 from reporting.models import Recording, Ticket
 from reporting.serializers import RecordingSerializer, ReportProblemSerializer, ReportFixSerializer, TicketSerializer
@@ -96,6 +97,24 @@ class IsValidProviderTicket(APIView):
             return Response({'success': False, 'error': "Invalid Provider/Ticket"})
         if ticket.provider != provider:
             return Response({'success': False, 'error': "Toilet/Problem not associated with the Provider"})
+        return Response({'success': True})
+
+
+class IsValidManagerTicket(APIView):
+    def post(self, request):
+        manager_id = request.data.get('manager_id', None)
+        ticket_id = request.data.get('ticket_id', None)
+        if not manager_id or not ticket_id:
+            return Response({'success': False, 'error': "Invalid POST data"})
+        try:
+            manager = Manager.objects.get(pk=manager_id)
+            # ticket = Ticket.objects.get(ticket_id=ticket_id)
+            ticket = Ticket.objects.exclude(status=Ticket.FIXED).get(pk=ticket_id)
+        except (Manager.DoesNotExist, Manager.MultipleObjectsReturned, Ticket.DoesNotExist,
+                Ticket.MultipleObjectsReturned):
+            return Response({'success': False, 'error': "Invalid Manager/Ticket"})
+        if not manager.providers.filter(toilets=ticket.toilet).exists():
+            return Response({'success': False, 'error': "Ticket not associated with the Manager"})
         return Response({'success': True})
 
 
