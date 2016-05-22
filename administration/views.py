@@ -74,6 +74,8 @@ class AddManager(View):
         last_name = serializer.validated_data['last_name']
         username = serializer.validated_data['username']
         password = serializer.validated_data['password']
+        pin_code = serializer.validated_data['pin_code']
+
         if not password:
             password = '123456'
         email = serializer.validated_data['email']
@@ -111,7 +113,7 @@ class AddManager(View):
         user_profile.picture = picture
         user_profile.save()
 
-        manager = Manager(user_profile=user_profile)
+        manager = Manager(user_profile=user_profile, pin_code=pin_code)
         manager.save()
 
         return HttpResponseRedirect("/administration/view_manager/%d/" % manager.id)

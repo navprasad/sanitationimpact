@@ -4,6 +4,7 @@ from administration.models import UserProfile
 
 class Manager(models.Model):
     user_profile = models.OneToOneField(UserProfile, on_delete=models.CASCADE)
+    pin_code = models.CharField(max_length=10)
 
     def delete(self, *args, **kwargs):
         self.user_profile.delete()
