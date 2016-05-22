@@ -2,7 +2,7 @@ from django.conf.urls import include, url
 from rest_framework import routers
 
 from administration.views import AdminViewSet, ProblemCategoryViewSet, ProblemViewSet, ToiletViewSet, TicketView,\
-    ToiletView, ProblemView, UserView, ViewManagers, AddManager, ViewProviders, AddProvider, ViewManager
+    ToiletView, ProblemView, UserView, ViewManagers, AddManager, ViewProviders, AddProvider, ViewManager, DeleteManager
 
 router = routers.DefaultRouter()
 router.register(r'admin', AdminViewSet)
@@ -23,6 +23,7 @@ urlpatterns = [
     url(r'^view_managers/$', ViewManagers.as_view(), name='view_managers'),
     url(r'^view_manager/(?P<manager_id>\d+)/$', ViewManager.as_view(), name='view_manager'),
     url(r'^add_manager/$', AddManager.as_view(), name='add_manager'),
+    url(r'^delete_manager(?P<manager_id>\d+)/$', DeleteManager.as_view(), name='delete_manager'),
     url(r'^view_providers/$', ViewProviders.as_view(), name='view_providers'),
     url(r'^add_provider/$', AddProvider.as_view(), name='add_provider'),
 ]

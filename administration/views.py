@@ -3,6 +3,7 @@ from django.views.generic import View
 from django.db import transaction
 from django.shortcuts import HttpResponseRedirect
 from django.contrib.auth.models import User
+from django.core.urlresolvers import reverse
 from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.decorators import detail_route
@@ -153,6 +154,15 @@ class ViewManager(View):
         user = UserProfile.objects.get(user=request.user)
         manager = Manager.objects.get(pk=manager_id)
         return render(request, 'manager/dashboard.html', {'user': user, 'manager': manager})
+
+
+class DeleteManager(View):
+    def get(self, request, manager_id):
+        try:
+            Manager.objects.get(pk=manager_id).delete()
+        except Manager.DoesNotExist:
+            pass
+        return HttpResponseRedirect(reverse('view_managers'))
 
 
 class ViewProviders(View):
