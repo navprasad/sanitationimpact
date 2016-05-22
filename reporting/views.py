@@ -52,13 +52,15 @@ class ReportProblem(APIView):
                 Problem.MultipleObjectsReturned):
             return Response({'success': False, 'error': "Invalid Toilet/Problem"})
 
+        # TODO: Handle this better: assign provider as None and let the administrator/manager decide
         providers = Provider.objects.filter(toilets__toilet_id=toilet_id, problems__id=problem.id)
         if not providers:
             return Response({'success': False, 'error': "No provider found for the Toilet/Problem"})
         provider = providers[0]
 
         # TODO: handle update ticket
-        ticket = Ticket(phone_number=phone_number, toilet=toilet, problem=problem)
+        # TODO: handle this while having no providers
+        ticket = Ticket(phone_number=phone_number, toilet=toilet, problem=problem, provider=provider)
         ticket.save()
 
         # send sms to the phone_number
@@ -79,14 +81,6 @@ class ReportProblem(APIView):
         return Response({'success': True, 'ticket_id': ticket.id})
 
 
-def is_valid_provider_ticket(provider, ticket):
-    if not provider.toilets.filter(pk=ticket.toilet_id).exists():
-        return False
-    if not provider.problems.filter(pk=ticket.problem_id).exists():
-        return False
-    return True
-
-
 class IsValidProviderTicket(APIView):
     def post(self, request):
         provider_id = request.data.get('provider_id', None)
@@ -100,7 +94,7 @@ class IsValidProviderTicket(APIView):
         except (Provider.DoesNotExist, Provider.MultipleObjectsReturned, Ticket.DoesNotExist,
                 Ticket.MultipleObjectsReturned):
             return Response({'success': False, 'error': "Invalid Provider/Ticket"})
-        if not is_valid_provider_ticket(provider, ticket):
+        if ticket.provider != provider:
             return Response({'success': False, 'error': "Toilet/Problem not associated with the Provider"})
         return Response({'success': True})
 
@@ -123,7 +117,7 @@ class ReportFix(APIView):
                 Provider.MultipleObjectsReturned):
             return Response({'success': False, 'error': "Invalid Ticket/Provider"})
 
-        if not validity_checked and not is_valid_provider_ticket(provider, ticket):
+        if not validity_checked and ticket.provider != provider:
             return Response({'success': False, 'error': "Toilet/Problem not associated with the Provider"})
 
         ticket.status = Ticket.FIXED
