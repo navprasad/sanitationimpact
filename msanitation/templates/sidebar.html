@@ -12,6 +12,7 @@
                         </li>
                     </ul>
                 </li>
+                {% if user.type == 'A' %}
                 <li><a><i class="fa fa-user"></i> Managers <span class="fa fa-chevron-down"></span></a>
                     <ul class="nav child_menu">
                         <li><a href="/administration/view_managers/">View</a>
@@ -20,6 +21,8 @@
                         </li>
                     </ul>
                 </li>
+                {% endif %}
+                {% if user.type == 'A' or user.type == 'M' %}
                 <li><a><i class="fa fa-users"></i> Providers <span class="fa fa-chevron-down"></span></a>
                     <ul class="nav child_menu">
                         <li><a href="/administration/view_providers/">View</a>
@@ -28,14 +31,18 @@
                         </li>
                     </ul>
                 </li>
+                {% endif %}
                 <li><a><i class="fa fa-building"></i> Toilets <span class="fa fa-chevron-down"></span></a>
                     <ul class="nav child_menu">
                         <li><a href="index.html">View</a>
                         </li>
+                    {% if user.type == 'A' or user.type == 'M' %}
                         <li><a href="index2.html">Add</a>
                         </li>
+                    {% endif %}
                     </ul>
                 </li>
+                {% if user.type == 'A' %}
                 <li><a><i class="fa fa-warning"></i> Problems <span class="fa fa-chevron-down"></span></a>
                     <ul class="nav child_menu">
                         <li><a href="index.html">View</a>
@@ -44,6 +51,7 @@
                         </li>
                     </ul>
                 </li>
+                {% endif %}
             </ul>
         </div>
     </div>
