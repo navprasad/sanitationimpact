@@ -3,8 +3,7 @@
 {% block pageContent %}
     <!-- page content -->
     <div class="right_col" role="main">
-
-        <div class="">
+        <div>
             <div class="page-title">
                 <div class="title_left">
                     <h3>Providers</h3>
@@ -53,23 +52,43 @@
                                             </div>
                                             <div class="col-xs-12 bottom text-center">
                                                 <div class="col-xs-12 col-sm-6 emphasis">
-                                                    <p class="ratings">
-                                                        <a>4.0</a>
-                                                        <a href="#"><span class="fa fa-star"></span></a>
-                                                        <a href="#"><span class="fa fa-star"></span></a>
-                                                        <a href="#"><span class="fa fa-star"></span></a>
-                                                        <a href="#"><span class="fa fa-star"></span></a>
-                                                        <a href="#"><span class="fa fa-star-o"></span></a>
-                                                    </p>
+                                                    <a href="/administration/view_provider/{{ provider.pk }}/"
+                                                       type="button"
+                                                       class="btn btn-primary btn-xs pull-left">
+                                                        <i class="fa fa-user"> </i> View
+                                                    </a>
+                                                    <button type="button" class="btn btn-success btn-xs pull-left">
+                                                        <i class="fa fa-comments-o"></i> Message
+                                                    </button>
                                                 </div>
                                                 <div class="col-xs-12 col-sm-6 emphasis">
-                                                    <button type="button" class="btn btn-success pull-right
-                                                        btn-xs"><i
-                                                            class="fa fa-user">
-                                                    </i> <i class="fa fa-comments-o"></i></button>
-                                                    <button type="button" class="btn btn-primary btn-xs pull-right">
-                                                        <i class="fa fa-user"> </i> View Profile
+                                                    <button type="button" class="btn btn-danger pull-right btn-xs"
+                                                            data-toggle="modal"
+                                                            data-target="#myModal{{ provider.id }}">
+                                                        Delete
                                                     </button>
+                                                    <div id="myModal{{ provider.id }}" class="modal fade" role="dialog">
+                                                        <div class="modal-dialog">
+                                                            <div class="modal-content">
+                                                                <div class="modal-header">
+                                                                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                                                    <h4 class="modal-title text-danger">Delete Provider</h4>
+                                                                </div>
+                                                                <div class="modal-body">
+                                                                    <p class="text-danger">Are you sure to delete this
+                                                                        provider?</p>
+                                                                </div>
+                                                                <div class="modal-footer">
+                                                                    <a type="button" class="btn btn-danger"
+                                                                       href="{% url 'delete_provider' provider.id %}">
+                                                                        Delete
+                                                                    </a>
+                                                                    <button type="button" class="btn btn-default"
+                                                                            data-dismiss="modal">Cancel</button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>

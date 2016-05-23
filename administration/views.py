@@ -11,8 +11,10 @@ from rest_framework.decorators import detail_route
 from administration.forms import UserProfileForm
 from administration.models import Admin, ProblemCategory, Problem, Toilet, UserProfile
 from administration.serializers import AdminSerializer, ProblemCategorySerializer, ProblemSerializer, \
-    ToiletSerializer, AddManagerSerializer
+    ToiletSerializer, AddManagerSerializer, AddProviderSerializer
 from manager.models import Manager
+from provider.models import Provider
+from provider.forms import ProviderForm
 
 
 class AdminViewSet(viewsets.ModelViewSet):
@@ -136,4 +138,109 @@ class DeleteManager(View):
 
 """
 End: Views for managing managers
+"""
+
+"""
+Begin: Views for managing providers
+"""
+
+
+class ViewProviders(View):
+    def get(self, request):
+        user = UserProfile.objects.get(user=request.user)
+        providers = Provider.objects.all()
+        return render(request, 'administration/view_providers.html', {'user': user, 'providers': providers})
+
+
+class AddProvider(View):
+    def get(self, request):
+        user = UserProfile.objects.get(user=request.user)
+        user_profile_form = UserProfileForm()
+        provider_form = ProviderForm()
+        return render(request, 'administration/add_provider.html', {'user': user,
+                                                                    'user_profile_form': user_profile_form,
+                                                                    'provider_form': provider_form})
+
+    @transaction.atomic()
+    def post(self, request):
+        user = UserProfile.objects.get(user=request.user)
+        user_profile_form = UserProfileForm()
+        provider_form = ProviderForm()
+
+        serializer = AddProviderSerializer(data=request.POST)
+        if not serializer.is_valid():
+            return render(request, 'administration/add_provider.html', {'user': user,
+                                                                        'error': 'Please enable JavaScript',
+                                                                        'user_profile_form': user_profile_form,
+                                                                        'provider_form': provider_form})
+        # Create User
+        first_name = serializer.validated_data['first_name']
+        last_name = serializer.validated_data['last_name']
+        username = serializer.validated_data['username']
+        password = serializer.validated_data['password']
+        if not password:
+            password = '123456'
+        email = serializer.validated_data['email']
+        if not email:
+            email = username + "@example.com"
+        try:
+            User.objects.get(username=username)
+            return render(request, 'administration/add_provider.html', {'user': user,
+                                                                        'error': 'Username already exists!',
+                                                                        'user_profile_form': user_profile_form,
+                                                                        'provider_form': provider_form})
+        except User.DoesNotExist:
+            pass
+        try:
+            User.objects.get(email=email)
+            return render(request, 'administration/add_provider.html', {'user': user,
+                                                                        'error': 'Email already exists!',
+                                                                        'user_profile_form': user_profile_form,
+                                                                        'provider_form': provider_form})
+        except User.DoesNotExist:
+            pass
+
+        provider_user = User.objects.create_user(first_name=first_name, last_name=last_name, username=username,
+                                                 password=password, email=email)
+
+        # Create the user_profile
+        phone_number = serializer.validated_data['phone_number']
+        address = serializer.validated_data['address']
+        picture = None
+        if request.FILES:
+            picture = request.FILES['picture']
+
+        user_profile = UserProfile.objects.get(user=provider_user)
+        user_profile.phone_number = phone_number
+        user_profile.address = address
+        user_profile.picture = picture
+        user_profile.type = 'P'
+        user_profile.save()
+
+        # Create the provider
+        manager = serializer.validated_data['manager']
+        provider_id = serializer.validated_data['provider_id']
+        pin_code = serializer.validated_data['pin_code']
+        toilets = serializer.validated_data['toilets']
+        problems = serializer.validated_data['problems']
+
+        provider = Provider(user_profile=user_profile, provider_id=provider_id, pin_code=pin_code, manager=manager)
+        provider.save()
+        provider.toilets.add(*toilets)
+        provider.problems.add(*problems)
+
+        return HttpResponseRedirect("/administration/view_provider/%d/" % provider.id)
+
+
+
+class DeleteProvider(View):
+    def get(self, request, provider_id):
+        try:
+            Provider.objects.get(pk=provider_id).delete()
+        except Provider.DoesNotExist:
+            pass
+        return HttpResponseRedirect(reverse('view_providers'))
+
+"""
+End: Views for managing providers
 """

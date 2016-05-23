@@ -38,13 +38,13 @@ class AddManagerSerializer(serializers.Serializer):
 class AddProviderSerializer(serializers.Serializer):
     provider_id = serializers.CharField(max_length=30)  # will act as username
     pin_code = serializers.CharField(max_length=10)  # will act as password
+    username = serializers.CharField(max_length=30)
+    password = serializers.CharField(allow_blank=True)
     first_name = serializers.CharField(max_length=30)
     last_name = serializers.CharField(max_length=30, allow_blank=True)
     email = serializers.CharField(max_length=254, allow_blank=True)
     phone_number = serializers.CharField(max_length=30)
     address = serializers.CharField()
-    manager = serializers.RelatedField(queryset=Manager.objects.all())
-
-    # manager = models.ForeignKey(Manager, on_delete=models.CASCADE)
-    # toilets = models.ManyToManyField(Toilet, related_name='providers')
-    # problems = models.ManyToManyField(Problem, related_name='providers')
+    manager = serializers.PrimaryKeyRelatedField(queryset=Manager.objects.all())
+    toilets = serializers.PrimaryKeyRelatedField(queryset=Toilet.objects.all(), many=True)
+    problems = serializers.PrimaryKeyRelatedField(queryset=Problem.objects.all(), many=True)
