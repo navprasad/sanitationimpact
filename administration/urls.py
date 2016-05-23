@@ -23,5 +23,5 @@ urlpatterns = [
     url(r'^view_providers/$', ViewProviders.as_view(), name='view_providers'),
     url(r'^view_provider/(?P<provider_id>\d+)/$', ViewProvider.as_view(), name='view_provider'),
     url(r'^add_provider/$', AddProvider.as_view(), name='add_provider'),
-    url(r'^delete_provider(?P<provider_id>\d+)/$', DeleteProvider.as_view(), name='delete_provider'),
+    url(r'^delete_provider/(?P<provider_id>\d+)/$', DeleteProvider.as_view(), name='delete_provider'),
 ]

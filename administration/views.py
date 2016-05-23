@@ -127,7 +127,7 @@ class AddManager(View):
         manager = Manager(user_profile=user_profile, pin_code=pin_code)
         manager.save()
 
-        return HttpResponseRedirect("/administration/view_manager/%d/" % manager.manager_id)
+        return HttpResponseRedirect("/administration/view_manager/%s/" % manager.manager_id)
 
 
 class ViewManager(View):
@@ -182,6 +182,16 @@ class AddProvider(View):
                                                                         'error': 'Please enable JavaScript',
                                                                         'user_profile_form': user_profile_form,
                                                                         'provider_form': provider_form})
+        provider_id = serializer.validated_data['provider_id']
+        try:
+            Provider.objects.get(provider_id=provider_id)
+            return render(request, 'administration/add_provider.html', {'user': user,
+                                                                        'error': 'Provider ID already exists!',
+                                                                        'user_profile_form': user_profile_form,
+                                                                        'provider_form': provider_form})
+        except Provider.DoesNotExist:
+            pass
+
         # Create User
         first_name = serializer.validated_data['first_name']
         last_name = serializer.validated_data['last_name']
@@ -228,7 +238,7 @@ class AddProvider(View):
 
         # Create the provider
         manager = serializer.validated_data['manager']
-        provider_id = serializer.validated_data['provider_id']
+        # provider_id = serializer.validated_data['provider_id']
         pin_code = serializer.validated_data['pin_code']
         toilets = serializer.validated_data['toilets']
         problems = serializer.validated_data['problems']
@@ -238,20 +248,20 @@ class AddProvider(View):
         provider.toilets.add(*toilets)
         provider.problems.add(*problems)
 
-        return HttpResponseRedirect("/administration/view_provider/%d/" % provider.id)
+        return HttpResponseRedirect("/administration/view_provider/%s/" % provider.provider_id)
 
 
 class ViewProvider(View):
     def get(self, request, provider_id):
         user = UserProfile.objects.get(user=request.user)
-        provider = Provider.objects.get(pk=provider_id)
+        provider = Provider.objects.get(provider_id=provider_id)
         return render(request, 'provider/dashboard.html', {'user': user, 'provider': provider})
 
 
 class DeleteProvider(View):
     def get(self, request, provider_id):
         try:
-            Provider.objects.get(pk=provider_id).delete()
+            Provider.objects.get(provider_id=provider_id).delete()
         except Provider.DoesNotExist:
             pass
         return HttpResponseRedirect(reverse('view_providers'))
