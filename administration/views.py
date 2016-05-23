@@ -232,6 +232,12 @@ class AddProvider(View):
         return HttpResponseRedirect("/administration/view_provider/%d/" % provider.id)
 
 
+class ViewProvider(View):
+    def get(self, request, provider_id):
+        user = UserProfile.objects.get(user=request.user)
+        provider = Provider.objects.get(pk=provider_id)
+        return render(request, 'provider/dashboard.html', {'user': user, 'provider': provider})
+
 
 class DeleteProvider(View):
     def get(self, request, provider_id):
