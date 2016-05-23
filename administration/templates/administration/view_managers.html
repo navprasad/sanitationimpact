@@ -53,7 +53,7 @@
                                             </div>
                                             <div class="col-xs-12 bottom text-center">
                                                 <div class="col-xs-12 col-sm-6 emphasis">
-                                                    <a href="/administration/view_manager/{{ manager.pk }}/"
+                                                    <a href="/administration/view_manager/{{ manager.manager_id }}/"
                                                        type="button"
                                                        class="btn btn-primary btn-xs pull-left">
                                                         <i class="fa fa-user"> </i> View
@@ -81,7 +81,7 @@
                                                                 </div>
                                                                 <div class="modal-footer">
                                                                     <a type="button" class="btn btn-danger"
-                                                                       href="{% url 'delete_manager' manager.id %}">
+                                                                       href="{% url 'delete_manager' manager.manager_id %}">
                                                                         Delete
                                                                     </a>
                                                                     <button type="button" class="btn btn-default"

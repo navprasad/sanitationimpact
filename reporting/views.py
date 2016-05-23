@@ -107,7 +107,7 @@ class IsValidManagerTicket(APIView):
         if not manager_id or not ticket_id:
             return Response({'success': False, 'error': "Invalid POST data"})
         try:
-            manager = Manager.objects.get(pk=manager_id)
+            manager = Manager.objects.get(manager_id=manager_id)
             # ticket = Ticket.objects.get(ticket_id=ticket_id)
             ticket = Ticket.objects.exclude(status=Ticket.FIXED).get(pk=ticket_id)
         except (Manager.DoesNotExist, Manager.MultipleObjectsReturned, Ticket.DoesNotExist,

@@ -29,6 +29,7 @@ class AddManagerSerializer(serializers.Serializer):
     last_name = serializers.CharField(max_length=30, allow_blank=True)
     username = serializers.CharField(max_length=30)
     password = serializers.CharField(allow_blank=True)
+    manager_id = serializers.CharField(max_length=100)
     pin_code = serializers.CharField(max_length=10)
     email = serializers.CharField(max_length=254, allow_blank=True)
     phone_number = serializers.CharField(max_length=30)

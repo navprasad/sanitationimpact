@@ -76,7 +76,16 @@ class AddManager(View):
         last_name = serializer.validated_data['last_name']
         username = serializer.validated_data['username']
         password = serializer.validated_data['password']
+        manager_id = serializer.validated_data['manager_id']
         pin_code = serializer.validated_data['pin_code']
+
+        try:
+            Manager.objects.get(manager_id=manager_id)
+            return render(request, 'administration/add_manager.html', {'user': user,
+                                                                       'error': 'Manager ID already exists!',
+                                                                       'user_profile_form': user_profile_form})
+        except Manager.DoesNotExist:
+            pass
 
         if not password:
             password = '123456'
@@ -118,20 +127,20 @@ class AddManager(View):
         manager = Manager(user_profile=user_profile, pin_code=pin_code)
         manager.save()
 
-        return HttpResponseRedirect("/administration/view_manager/%d/" % manager.id)
+        return HttpResponseRedirect("/administration/view_manager/%d/" % manager.manager_id)
 
 
 class ViewManager(View):
     def get(self, request, manager_id):
         user = UserProfile.objects.get(user=request.user)
-        manager = Manager.objects.get(pk=manager_id)
+        manager = Manager.objects.get(manager_id=manager_id)
         return render(request, 'manager/dashboard.html', {'user': user, 'manager': manager})
 
 
 class DeleteManager(View):
     def get(self, request, manager_id):
         try:
-            Manager.objects.get(pk=manager_id).delete()
+            Manager.objects.get(manager_id=manager_id).delete()
         except Manager.DoesNotExist:
             pass
         return HttpResponseRedirect(reverse('view_managers'))

@@ -25,7 +25,7 @@ class IsValidManager(APIView):
         if not manager_id:
             return Response({'success': False, 'error': "Invalid POST data"})
         try:
-            Manager.objects.get(pk=manager_id)
+            Manager.objects.get(manager_id=manager_id)
         except (Manager.DoesNotExist, Manager.MultipleObjectsReturned):
             return Response({'success': False, 'error': "Invalid Manager ID"})
         return Response({'success': True})
@@ -38,7 +38,7 @@ class IsValidManagerPinCode(APIView):
         if not manager_id or not pin_code:
             return Response({'success': False, 'error': "Invalid POST data"})
         try:
-            Manager.objects.get(pk=manager_id, pin_code=pin_code)
+            Manager.objects.get(manager_id=manager_id, pin_code=pin_code)
         except (Manager.DoesNotExist, Manager.MultipleObjectsReturned):
             return Response({'success': False, 'error': "Invalid Manager ID/PIN Code"})
         return Response({'success': True})
