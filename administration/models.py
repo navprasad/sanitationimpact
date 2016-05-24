@@ -55,6 +55,14 @@ class ProblemCategory(models.Model):
         ordering = ('index',)
 
 
+@receiver(post_save, sender=ProblemCategory)
+def create_dummy_problem_for_audio_recording_category(sender, **kwargs):
+    instance = kwargs['instance']
+    if kwargs['created']:  # create
+        if instance.is_audio_recording:
+            Problem(index=1, description='dummy_audio_recording', category=instance).save()
+
+
 class Problem(models.Model):
     index = models.IntegerField(db_index=True)
     description = models.CharField(max_length=255)
