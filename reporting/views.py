@@ -2,7 +2,7 @@ import os
 import urllib2
 
 from django.conf import settings
-from requests.utils import quote
+from administration.views import send_sms
 from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -78,19 +78,12 @@ class ReportProblem(APIView):
 
         # send sms to the phone_number
         message = "Your complaint have been registered. Ticket ID: " + str(ticket.id)
-        api_key = "KK48377d55790faf6e93f66223c078ced3"
-        params = "phone_no=" + phone_number + "&api_key=" + api_key + "&message=" + quote(message, safe='')
-        url_root = "http://www.kookoo.in/outbound/outbound_sms.php?"
-        url = url_root + params
-
-        urllib2.urlopen(url).read()
+        send_sms(phone_number, message)
 
         # send sms to the provider
         # TODO: When provider is handled, add a check here
         message = "Complaint registered for Toilet ID: " + str(toilet_id) + ". Ticket ID: " + str(ticket.id)
-        params = "phone_no=" + provider.phone_number + "&api_key=" + api_key + "&message=" + quote(message, safe='')
-        url = url_root + params
-        urllib2.urlopen(url).read()
+        send_sms(provider.user_profile.phone_number, message)
 
         return Response({'success': True, 'ticket_id': ticket.id})
 

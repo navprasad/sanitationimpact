@@ -1,9 +1,12 @@
+import urllib2
+
 from django.shortcuts import get_object_or_404, render
 from django.views.generic import View
 from django.db import transaction
 from django.shortcuts import HttpResponseRedirect
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
+from requests.utils import quote
 from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.decorators import detail_route
@@ -41,6 +44,14 @@ class ProblemViewSet(viewsets.ModelViewSet):
 class ToiletViewSet(viewsets.ModelViewSet):
     queryset = Toilet.objects.all()
     serializer_class = ToiletSerializer
+
+
+def send_sms(phone_number, message):
+    api_key = "KK48377d55790faf6e93f66223c078ced3"
+    params = "phone_no=" + phone_number + "&api_key=" + api_key + "&message=" + quote(message, safe='')
+    url_root = "http://www.kookoo.in/outbound/outbound_sms.php?"
+    url = url_root + params
+    urllib2.urlopen(url).read()
 
 
 """
