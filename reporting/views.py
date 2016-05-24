@@ -54,14 +54,14 @@ class ReportProblem(APIView):
                 Problem.MultipleObjectsReturned):
             return Response({'success': False, 'error': "Invalid Toilet/Problem"})
 
-        # TODO: Handle this better: assign provider as None and let the administrator/manager decide
         providers = Provider.objects.filter(toilets__toilet_id=toilet_id, problems__id=problem.id)
         if not providers:
-            return Response({'success': False, 'error': "No provider found for the Toilet/Problem"})
-        provider = providers[0]
+            provider = None
+        else:
+            # TODO: Handle this better
+            provider = providers[0]
 
         # TODO: handle update ticket
-        # TODO: handle this while having no providers
         ticket = Ticket(phone_number=phone_number, toilet=toilet, problem=problem, provider=provider)
         ticket.save()
 
@@ -81,9 +81,9 @@ class ReportProblem(APIView):
         send_sms(phone_number, message)
 
         # send sms to the provider
-        # TODO: When provider is handled, add a check here
-        message = "Complaint registered for Toilet ID: " + str(toilet_id) + ". Ticket ID: " + str(ticket.id)
-        send_sms(provider.user_profile.phone_number, message)
+        if provider:
+            message = "Complaint registered for Toilet ID: " + str(toilet_id) + ". Ticket ID: " + str(ticket.id)
+            send_sms(provider.user_profile.phone_number, message)
 
         return Response({'success': True, 'ticket_id': ticket.id})
 
