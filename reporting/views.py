@@ -45,6 +45,7 @@ class ReportProblem(APIView):
         toilet_id = serializer.validated_data['toilet_id']
         category_index = serializer.validated_data['category_index']
         problem_index = serializer.validated_data['problem_index']
+        audio_file_url = serializer.validated_data.get('audio_file_url')
 
         try:
             toilet = Toilet.objects.get(toilet_id=toilet_id)
@@ -64,6 +65,17 @@ class ReportProblem(APIView):
         ticket = Ticket(phone_number=phone_number, toilet=toilet, problem=problem, provider=provider)
         ticket.save()
 
+        if problem.category.is_audio_recording:
+            if not audio_file_url:
+                return Response({'success': False, 'error': "Invalid POST data"})
+            file_name = os.path.basename('ticket_' + str(ticket.id) + '_audio.mp3')
+            full_file_path = os.path.join(settings.MEDIA_ROOT, "ticket_audio_files", file_name)
+
+            download_response = download_audio(audio_file_url, full_file_path)
+            if not download_response['success']:
+                ticket.delete()
+                return Response(download_response)
+
         # send sms to the phone_number
         message = "Your complaint have been registered. Ticket ID: " + str(ticket.id)
         api_key = "KK48377d55790faf6e93f66223c078ced3"
@@ -74,6 +86,7 @@ class ReportProblem(APIView):
         urllib2.urlopen(url).read()
 
         # send sms to the provider
+        # TODO: When provider is handled, add a check here
         message = "Complaint registered for Toilet ID: " + str(toilet_id) + ". Ticket ID: " + str(ticket.id)
         params = "phone_no=" + provider.phone_number + "&api_key=" + api_key + "&message=" + quote(message, safe='')
         url = url_root + params
@@ -160,19 +173,23 @@ class DownloadAudio(APIView):
         except (Ticket.DoesNotExist, Ticket.MultipleObjectsReturned):
             return Response({'success': False, 'error': "Invalid Ticket ID"})
 
-        try:
-            audio_file = urllib2.urlopen(audio_file_url)
-        except ValueError:
-            return Response({'success': False, 'error': "Invalid URL"})
-
-        file_name = os.path.basename('ticket_' + str(ticket.id) + '_audio.mp3')
+        file_name = os.path.basename('ticket_' + str(ticket.id) + '_provider_audio.mp3')
         full_file_path = os.path.join(settings.MEDIA_ROOT, "ticket_audio_files", file_name)
-        if not os.path.exists(os.path.dirname(full_file_path)):
-            os.makedirs(os.path.dirname(full_file_path))
-        with open(full_file_path, "wb") as local_file:
-            local_file.write(audio_file.read())
 
-        return Response({'success': True})
+        download_response = download_audio(audio_file_url, full_file_path)
+        return Response(download_response)
+
+
+def download_audio(audio_file_url, full_file_path):
+    try:
+        audio_file = urllib2.urlopen(audio_file_url)
+    except ValueError:
+        return {'success': False, 'error': "Invalid audio file URL"}
+    if not os.path.exists(os.path.dirname(full_file_path)):
+        os.makedirs(os.path.dirname(full_file_path))
+    with open(full_file_path, "wb") as local_file:
+        local_file.write(audio_file.read())
+    return {'success': True}
 
 
 class GetAudioURL(APIView):
@@ -188,7 +205,7 @@ class GetAudioURL(APIView):
         except (Ticket.DoesNotExist, Ticket.MultipleObjectsReturned):
             return Response({'success': False, 'error': "Invalid Ticket ID"})
 
-        file_name = os.path.basename('ticket_' + str(ticket.id) + '_audio.mp3')
+        file_name = os.path.basename('ticket_' + str(ticket.id) + '_provider_audio.mp3')
         full_file_path = os.path.join(settings.MEDIA_ROOT, "ticket_audio_files", file_name)
         if not os.path.isfile(full_file_path):
             return Response({'success': False, 'error': "Audio file does not exist"})

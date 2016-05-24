@@ -18,6 +18,7 @@ class ReportProblemSerializer(serializers.Serializer):
     toilet_id = serializers.CharField(max_length=100)
     category_index = serializers.IntegerField()
     problem_index = serializers.IntegerField()
+    audio_file_url = serializers.CharField(max_length=255, required=False)
 
 
 class ReportFixSerializer(serializers.Serializer):

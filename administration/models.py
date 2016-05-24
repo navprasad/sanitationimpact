@@ -46,6 +46,7 @@ class Admin(models.Model):
 class ProblemCategory(models.Model):
     index = models.IntegerField(unique=True, db_index=True)
     description = models.CharField(max_length=255)
+    is_audio_recording = models.BooleanField(default=False)
 
     def __unicode__(self):
         return str(self.index) + ': ' + self.description
