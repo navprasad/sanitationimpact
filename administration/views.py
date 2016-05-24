@@ -11,7 +11,7 @@ from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.decorators import detail_route
 
-from administration.forms import UserProfileForm
+from administration.forms import UserProfileForm, ToiletForm
 from administration.models import Admin, ProblemCategory, Problem, Toilet, UserProfile
 from administration.serializers import AdminSerializer, ProblemCategorySerializer, ProblemSerializer, \
     ToiletSerializer, AddManagerSerializer, AddProviderSerializer
@@ -279,4 +279,63 @@ class DeleteProvider(View):
 
 """
 End: Views for managing providers
+"""
+
+"""
+Begin: Views for managing toilets
+"""
+
+
+class ViewToilets(View):
+    def get(self, request):
+        user = UserProfile.objects.get(user=request.user)
+        toilets = Toilet.objects.all()
+        return render(request, 'administration/view_toilets.html', {'user': user, 'toilets': toilets})
+
+
+class AddToilet(View):
+    def get(self, request):
+        user = UserProfile.objects.get(user=request.user)
+        toilet_form = ToiletForm()
+        return render(request, 'administration/add_toilet.html', {'user': user,
+                                                                  'toilet_form': toilet_form})
+
+    @transaction.atomic()
+    def post(self, request):
+        user = UserProfile.objects.get(user=request.user)
+
+        address = request.POST.get('address')
+        toilet_id = request.POST.get('toilet_id')
+
+        if not address or not toilet_id:
+            toilet_form = ToiletForm()
+            return render(request, 'administration/add_toilet.html', {'user': user,
+                                                                      'error': 'Please enable javascript!',
+                                                                      'toilet_form': toilet_form})
+        try:
+            Toilet.objects.get(toilet_id=toilet_id)
+            toilet_form = ToiletForm(data=request.POST)
+            return render(request, 'administration/add_toilet.html', {'user': user,
+                                                                      'error': 'Toilet ID already exists!',
+                                                                      'toilet_form': toilet_form})
+        except Toilet.DoesNotExist:
+            pass
+
+        # Create Toilet
+        toilet = Toilet(toilet_id=toilet_id, address=address)
+        toilet.save()
+
+        return HttpResponseRedirect("/administration/view_toilets/")
+
+
+class DeleteToilet(View):
+    def get(self, request, toilet_id):
+        try:
+            Toilet.objects.get(toilet_id=toilet_id).delete()
+        except Toilet.DoesNotExist:
+            pass
+        return HttpResponseRedirect(reverse('view_toilets'))
+
+"""
+End: Views for managing toilets
 """

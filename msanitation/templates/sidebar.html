@@ -34,12 +34,12 @@
                 {% endif %}
                 <li><a><i class="fa fa-building"></i> Toilets <span class="fa fa-chevron-down"></span></a>
                     <ul class="nav child_menu">
-                        <li><a href="index.html">View</a>
+                        <li><a href="/administration/view_toilets/">View</a>
                         </li>
-                    {% if user.type == 'A' or user.type == 'M' %}
-                        <li><a href="index2.html">Add</a>
-                        </li>
-                    {% endif %}
+                        {% if user.type == 'A' or user.type == 'M' %}
+                            <li><a href="/administration/add_toilet/">Add</a>
+                            </li>
+                        {% endif %}
                     </ul>
                 </li>
                 {% if user.type == 'A' %}

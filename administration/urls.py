@@ -3,7 +3,8 @@ from rest_framework import routers
 
 from administration.views import AdminViewSet, ProblemCategoryViewSet, ProblemViewSet, ToiletViewSet,\
     ViewManagers, AddManager, ViewManager, DeleteManager,\
-    ViewProviders, AddProvider, ViewProvider, DeleteProvider
+    ViewProviders, AddProvider, ViewProvider, DeleteProvider,\
+    ViewToilets, AddToilet, DeleteToilet
 
 router = routers.DefaultRouter()
 router.register(r'admin', AdminViewSet)
@@ -24,4 +25,8 @@ urlpatterns = [
     url(r'^view_provider/(?P<provider_id>\d+)/$', ViewProvider.as_view(), name='view_provider'),
     url(r'^add_provider/$', AddProvider.as_view(), name='add_provider'),
     url(r'^delete_provider/(?P<provider_id>\d+)/$', DeleteProvider.as_view(), name='delete_provider'),
+
+    url(r'^view_toilets/$', ViewToilets.as_view(), name='view_toilets'),
+    url(r'^add_toilet/$', AddToilet.as_view(), name='add_toilet'),
+    url(r'^delete_toilet/(?P<toilet_id>\d+)/$', DeleteToilet.as_view(), name='delete_toilet'),
 ]

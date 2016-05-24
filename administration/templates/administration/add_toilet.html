@@ -1,0 +1,71 @@
+{% extends 'sidebar.html' %}
+
+{% load staticfiles %}
+
+{% block pageContent %}
+    <!-- page content -->
+    <div class="right_col" role="main">
+        <div class="page-title">
+            <div class="title_left">
+                <h3>Add Toilet</h3>
+            </div>
+        </div>
+        <div class="clearfix"></div>
+        <div class="row">
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                <div class="x_panel">
+                    <div class="x_content">
+                        <br/>
+                        <form method="POST" data-parsley-validate class="form-horizontal form-label-left" novalidate
+                              enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <!-- Error -->
+                            {% if error %}
+                                <div class="form-group">
+                                    <label class="control-label col-md-3 col-sm-3 col-xs-12"></label>
+                                    <div class="col-md-6 col-sm-6 col-xs-12">
+                                        <label class="text-danger">{{ error }}</label>
+                                    </div>
+                                </div>
+                            {% endif %}
+                            <!-- /Error -->
+                            <!-- Toilet ID -->
+                            <div class="form-group">
+                                <label class="control-label col-md-3 col-sm-3 col-xs-12" for="id_toilet_id">Toilet ID
+                                    <span class="required">*</span>
+                                </label>
+                                <div class="col-md-6 col-sm-6 col-xs-12">
+                                    {{ toilet_form.toilet_id }}
+                                </div>
+                            </div>
+                            <!-- /Toilet ID -->
+                            <!-- Address -->
+                            <div class="form-group">
+                                <label class="control-label col-md-3 col-sm-3 col-xs-12" for="id_address">Address
+                                    <span class="required">*</span>
+                                </label>
+                                <div class="col-md-6 col-sm-6 col-xs-12">
+                                    {{ toilet_form.address }}
+                                </div>
+                            </div>
+                            <!-- /Address -->
+                            <div class="ln_solid"></div>
+                            <div class="form-group">
+                                <div class="col-md-6 col-sm-6 col-xs-12 col-md-offset-3">
+                                    <button type="submit" class="btn btn-success">Submit</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- /page content -->
+{% endblock %}
+
+{% block jsLinks %}
+    <!-- validation -->
+    <script src="{% static "vendors/parsleyjs/dist/parsley.min.js" %}"></script>
+    <!-- /validation -->
+{% endblock %}
