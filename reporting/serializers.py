@@ -1,11 +1,6 @@
 from rest_framework import serializers
 
-from reporting.models import Recording, Ticket
-
-
-class RecordingSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Recording
+from reporting.models import Ticket
 
 
 class TicketSerializer(serializers.ModelSerializer):

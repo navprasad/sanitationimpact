@@ -10,13 +10,8 @@ from rest_framework.views import APIView
 from administration.models import Toilet, Problem
 from manager.models import Manager
 from provider.models import Provider
-from reporting.models import Recording, Ticket
-from reporting.serializers import RecordingSerializer, ReportProblemSerializer, ReportFixSerializer, TicketSerializer
-
-
-class RecordingViewSet(viewsets.ModelViewSet):
-    queryset = Recording.objects.all()
-    serializer_class = RecordingSerializer
+from reporting.models import Ticket
+from reporting.serializers import ReportProblemSerializer, ReportFixSerializer, TicketSerializer
 
 
 class TicketViewSet(viewsets.ModelViewSet):

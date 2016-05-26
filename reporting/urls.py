@@ -1,11 +1,10 @@
 from django.conf.urls import include, url
 from rest_framework import routers
 
-from reporting.views import RecordingViewSet, TicketViewSet, IsValidToilet, IsValidProviderTicket, ReportProblem, \
+from reporting.views import TicketViewSet, IsValidToilet, IsValidProviderTicket, ReportProblem, \
     ReportFix, DownloadAudio, GetAudioURL, IsValidManagerTicket
 
 router = routers.DefaultRouter()
-router.register(r'recording', RecordingViewSet)
 router.register(r'ticket', TicketViewSet)
 
 urlpatterns = [

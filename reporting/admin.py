@@ -1,5 +1,4 @@
 from django.contrib import admin
-from reporting.models import Recording, Ticket
+from reporting.models import Ticket
 
-admin.site.register(Recording)
 admin.site.register(Ticket)
