@@ -17,7 +17,7 @@ class Ticket(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True, db_index=True)
     toilet = models.ForeignKey(Toilet, related_name='tickets')
     problem = models.ForeignKey(Problem, related_name='tickets')
-    provider = models.ForeignKey(Provider, related_name='tickets', null=True, on_delete=models.SET_NULL)
+    provider = models.ForeignKey(Provider, related_name='tickets', null=True, blank=True, on_delete=models.SET_NULL)
     status = models.IntegerField(default=UNRESOLVED)
     is_audio_present = models.BooleanField(default=False)
     is_provider_audio_present = models.BooleanField(default=False)
