@@ -18,6 +18,7 @@ from administration.serializers import AdminSerializer, ProblemCategorySerialize
 from manager.models import Manager
 from provider.models import Provider
 from provider.forms import ProviderForm
+from reporting.models import Ticket
 
 
 class AdminViewSet(viewsets.ModelViewSet):
@@ -145,7 +146,9 @@ class ViewManager(View):
     def get(self, request, manager_id):
         user = UserProfile.objects.get(user=request.user)
         manager = Manager.objects.get(manager_id=manager_id)
-        return render(request, 'manager/dashboard.html', {'user': user, 'manager': manager})
+        related_toilets = Toilet.objects.filter(providers__manager=manager)
+        tickets = Ticket.objects.filter(toilet__in=related_toilets)
+        return render(request, 'manager/dashboard.html', {'user': user, 'manager': manager, 'tickets': tickets})
 
 
 class DeleteManager(View):
@@ -266,7 +269,8 @@ class ViewProvider(View):
     def get(self, request, provider_id):
         user = UserProfile.objects.get(user=request.user)
         provider = Provider.objects.get(provider_id=provider_id)
-        return render(request, 'provider/dashboard.html', {'user': user, 'provider': provider})
+        tickets = Ticket.objects.filter(provider=provider)
+        return render(request, 'provider/dashboard.html', {'user': user, 'provider': provider, 'tickets': tickets})
 
 
 class DeleteProvider(View):

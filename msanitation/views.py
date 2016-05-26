@@ -6,8 +6,9 @@ from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.contrib.auth import logout
 
-from administration.models import UserProfile
+from administration.models import UserProfile, Toilet
 from manager.models import Manager
+from reporting.models import Ticket
 
 
 class Login(View):
@@ -48,10 +49,14 @@ class DashBoard(View):
     def get(self, request):
         user = UserProfile.objects.get(user=request.user)
         if user.type == 'A':
-            return render(request, 'administration/dashboard.html', {'user': user})
+            tickets = Ticket.objects.all()
+            return render(request, 'administration/dashboard.html', {'user': user, 'tickets': tickets})
         elif user.type == 'M':
             manager = Manager.objects.get(user_profile=user)
-            return render(request, 'manager/dashboard.html', {'user': user, 'manager': manager})
+            related_toilets = Toilet.objects.filter(providers__manager=manager)
+            tickets = Ticket.objects.filter(toilet__in=related_toilets)
+            return render(request, 'manager/dashboard.html', {'user': user, 'manager': manager, 'tickets': tickets})
         elif user.type == 'P':
-            return render(request, 'provider/dashboard.html')
+            tickets = Ticket.objects.filter(provider__user_profile=user)
+            return render(request, 'provider/dashboard.html', {'user': user, 'tickets': tickets})
         return HttpResponse("Invalid User")

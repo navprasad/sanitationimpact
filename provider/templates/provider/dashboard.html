@@ -121,125 +121,53 @@
                                                         <!-- start project list -->
                                                         <table class="table table-striped projects">
                                                             <thead>
-                                                            <tr>
-                                                                <th style="width: 1%">#</th>
-                                                                <th>Ticket ID</th>
-                                                                <th class="text-center">Created Date</th>
-                                                                <th>Toilet Address</th>
-                                                                <th>Problem</th>
-                                                                <th class="text-center">Recording</th>
-                                                                <th class="text-center">Status</th>
-                                                                <th class="text-center">Resolved Date</th>
-                                                            </tr>
+                                                                <tr>
+                                                                    <th style="width: 1%">#</th>
+                                                                    <th>Ticket ID</th>
+                                                                    <th class="text-center">Created Date</th>
+                                                                    <th>Toilet Address</th>
+                                                                    <th>Problem</th>
+                                                                    <th class="text-center">Recording</th>
+                                                                    <th class="text-center">Status</th>
+                                                                </tr>
                                                             </thead>
                                                             <tbody>
-                                                            <tr>
-                                                                <td>#</td>
-                                                                <td>
-                                                                    <a>1</a>
-                                                                </td>
-                                                                <td class="text-center">
-                                                                    01.01.2016
-                                                                </td>
-                                                                <td>
-                                                                    Toilet number 2, Somebody's complex, Ambedkar colony
-                                                                </td>
-                                                                <td>
-                                                                    Unclean toilet
-                                                                </td>
-                                                                <td class="text-center">
-                                                                    <span class="glyphicon glyphicon-download"
-                                                                          style="font-size: 25px"/>
-                                                                </td>
-                                                                <td class="text-center">
-                                                                    <button type="button"
-                                                                            class="btn btn-danger btn-xs">Unresolved
-                                                                    </button>
-                                                                </td>
-                                                                <td>
-                                                                </td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td>#</td>
-                                                                <td>
-                                                                    <a>2</a>
-                                                                </td>
-                                                                <td class="text-center">
-                                                                    01.01.2016
-                                                                </td>
-                                                                <td>
-                                                                    Toilet number 2, Somebody's complex, Ambedkar colony
-                                                                </td>
-                                                                <td>
-                                                                    No electricity
-                                                                </td>
-                                                                <td class="text-center">
-                                                                    <span class="glyphicon glyphicon-download"
-                                                                          style="font-size: 25px"/>
-                                                                </td>
-                                                                <td class="text-center">
-                                                                    <button type="button"
-                                                                            class="btn btn-success btn-xs">Resolved
-                                                                    </button>
-                                                                </td>
-                                                                <td class="text-center">
-                                                                    01.01.2016
-                                                                </td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td>#</td>
-                                                                <td>
-                                                                    <a>3</a>
-                                                                </td>
-                                                                <td class="text-center">
-                                                                    01.01.2016
-                                                                </td>
-                                                                <td>
-                                                                    Toilet number 2, Somebody's complex, Ambedkar colony
-                                                                </td>
-                                                                <td>
-                                                                    No water
-                                                                </td>
-                                                                <td class="text-center">
-                                                                    <span class="glyphicon glyphicon-download"
-                                                                          style="font-size: 25px"/>
-                                                                </td>
-                                                                <td class="text-center">
-                                                                    <button type="button"
-                                                                            class="btn btn-success btn-xs">Resolved
-                                                                    </button>
-                                                                </td>
-                                                                <td class="text-center">
-                                                                    01.01.2016
-                                                                </td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td>#</td>
-                                                                <td>
-                                                                    <a>4</a>
-                                                                </td>
-                                                                <td class="text-center">
-                                                                    01.01.2016
-                                                                </td>
-                                                                <td>
-                                                                    Toilet number 2, Somebody's complex, Ambedkar colony
-                                                                </td>
-                                                                <td>
-                                                                    Unclean toilet
-                                                                </td>
-                                                                <td class="text-center">
-                                                                    <span class="glyphicon glyphicon-download"
-                                                                          style="font-size: 25px"/>
-                                                                </td>
-                                                                <td class="text-center">
-                                                                    <button type="button"
-                                                                            class="btn btn-success btn-xs">Resolved
-                                                                    </button>
-                                                                </td>
-                                                                <td class="text-center">
-                                                                    01.01.2016
-                                                                </td>
-                                                            </tr>
+                                                            {% for ticket in tickets %}
+                                                                <tr>
+                                                                    <td>#</td>
+                                                                    <td>
+                                                                        <a>{{ ticket.id }}</a>
+                                                                    </td>
+                                                                    <td class="text-center">
+                                                                        {{ ticket.timestamp | date:"d.m.Y" }}
+                                                                    </td>
+                                                                    <td>
+                                                                        {{ ticket.toilet.address }}
+                                                                    </td>
+                                                                    <td>
+                                                                        {{ ticket.problem.description }}
+                                                                    </td>
+                                                                    <td class="text-center">
+                                                                        <span class="glyphicon glyphicon-download"
+                                                                              style="font-size: 25px"/>
+                                                                    </td>
+                                                                    <td class="text-center">
+                                                                        {% if ticket.status == 0 %}
+                                                                            <button type="button"
+                                                                                    class="btn btn-danger btn-xs">Unresolved
+                                                                            </button>
+                                                                        {% elif ticket.status == 1 %}
+                                                                            <button type="button"
+                                                                                    class="btn btn-success btn-xs">Resolved
+                                                                            </button>
+                                                                        {% elif ticket.status == 2 %}
+                                                                            <button type="button"
+                                                                                    class="btn btn-warning btn-xs">Cannot Fix
+                                                                            </button>
+                                                                        {% endif %}
+                                                                    </td>
+                                                                </tr>
+                                                            {% endfor %}
                                                             </tbody>
                                                         </table>
                                                         <!-- end project list -->
