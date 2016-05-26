@@ -70,6 +70,8 @@ class ReportProblem(APIView):
             if not download_response['success']:
                 ticket.delete()
                 return Response(download_response)
+            ticket.is_audio_present = True
+            ticket.save()
 
         # send sms to the phone_number
         message = "Your complaint have been registered. Ticket ID: " + str(ticket.id)
@@ -165,6 +167,9 @@ class DownloadAudio(APIView):
         full_file_path = os.path.join(settings.MEDIA_ROOT, "ticket_audio_files", file_name)
 
         download_response = download_audio(audio_file_url, full_file_path)
+        if download_response['success']:
+            ticket.is_provider_audio_present = True
+            ticket.save()
         return Response(download_response)
 
 

@@ -19,6 +19,8 @@ class Ticket(models.Model):
     problem = models.ForeignKey(Problem, related_name='tickets')
     provider = models.ForeignKey(Provider, related_name='tickets', null=True, on_delete=models.SET_NULL)
     status = models.IntegerField(default=UNRESOLVED)
+    is_audio_present = models.BooleanField(default=False)
+    is_provider_audio_present = models.BooleanField(default=False)
 
     def __unicode__(self):
         return str(self.id)

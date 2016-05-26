@@ -60,7 +60,7 @@ def create_dummy_problem_for_audio_recording_category(sender, **kwargs):
     instance = kwargs['instance']
     if kwargs['created']:  # create
         if instance.is_audio_recording:
-            Problem(index=1, description='dummy_audio_recording', category=instance).save()
+            Problem(index=1, description='Voice Recording', category=instance).save()
 
 
 class Problem(models.Model):

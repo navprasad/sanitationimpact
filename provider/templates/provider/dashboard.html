@@ -128,6 +128,7 @@
                                                                     <th>Toilet Address</th>
                                                                     <th>Problem</th>
                                                                     <th class="text-center">Recording</th>
+                                                                    <th class="text-center">Provider Recording</th>
                                                                     <th class="text-center">Status</th>
                                                                 </tr>
                                                             </thead>
@@ -148,8 +149,20 @@
                                                                         {{ ticket.problem.description }}
                                                                     </td>
                                                                     <td class="text-center">
+                                                                        {% if ticket.is_audio_present %}
+                                                                        <a href="/media/ticket_audio_files/ticket_{{ ticket.id }}_audio.mp3">
                                                                         <span class="glyphicon glyphicon-download"
                                                                               style="font-size: 25px"/>
+                                                                        </a>
+                                                                        {% endif %}
+                                                                    </td>
+                                                                    <td class="text-center">
+                                                                        {% if ticket.is_provider_audio_present %}
+                                                                        <a href="/media/ticket_audio_files/ticket_{{ ticket.id }}_provider_audio.mp3">
+                                                                        <span class="glyphicon glyphicon-download"
+                                                                              style="font-size: 25px"/>
+                                                                        </a>
+                                                                        {% endif %}
                                                                     </td>
                                                                     <td class="text-center">
                                                                         {% if ticket.status == 0 %}
