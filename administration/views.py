@@ -136,10 +136,9 @@ class AddManager(View):
         user_profile.picture = picture
         user_profile.save()
 
-        manager = Manager(user_profile=user_profile, pin_code=pin_code)
-        manager.save()
+        Manager(user_profile=user_profile, manager_id=manager_id, pin_code=pin_code).save()
 
-        return HttpResponseRedirect("/administration/view_manager/%s/" % manager.manager_id)
+        return HttpResponseRedirect("/administration/view_manager/%s/" % manager_id)
 
 
 class ViewManager(View):
@@ -148,7 +147,15 @@ class ViewManager(View):
         manager = Manager.objects.get(manager_id=manager_id)
         related_toilets = Toilet.objects.filter(providers__manager=manager)
         tickets = Ticket.objects.filter(toilet__in=related_toilets)
-        return render(request, 'manager/dashboard.html', {'user': user, 'manager': manager, 'tickets': tickets})
+
+        total_tickets = len(tickets)
+        unresolved_tickets = len(filter(lambda ticket: ticket.status == Ticket.UNRESOLVED, tickets))
+        resolved_tickets = total_tickets - unresolved_tickets
+
+        return render(request, 'manager/dashboard.html', {'user': user, 'manager': manager, 'tickets': tickets,
+                                                          'total_tickets': total_tickets,
+                                                          'unresolved_tickets': unresolved_tickets,
+                                                          'resolved_tickets': resolved_tickets})
 
 
 class DeleteManager(View):
@@ -270,7 +277,15 @@ class ViewProvider(View):
         user = UserProfile.objects.get(user=request.user)
         provider = Provider.objects.get(provider_id=provider_id)
         tickets = Ticket.objects.filter(provider=provider)
-        return render(request, 'provider/dashboard.html', {'user': user, 'provider': provider, 'tickets': tickets})
+
+        total_tickets = len(tickets)
+        unresolved_tickets = len(filter(lambda ticket: ticket.status == Ticket.UNRESOLVED, tickets))
+        resolved_tickets = total_tickets - unresolved_tickets
+
+        return render(request, 'provider/dashboard.html', {'user': user, 'provider': provider, 'tickets': tickets,
+                                                           'total_tickets': total_tickets,
+                                                           'unresolved_tickets': unresolved_tickets,
+                                                           'resolved_tickets': resolved_tickets})
 
 
 class DeleteProvider(View):

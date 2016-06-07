@@ -50,13 +50,37 @@ class DashBoard(View):
         user = UserProfile.objects.get(user=request.user)
         if user.type == 'A':
             tickets = Ticket.objects.all()
-            return render(request, 'administration/dashboard.html', {'user': user, 'tickets': tickets})
+
+            total_tickets = len(tickets)
+            unresolved_tickets = len(filter(lambda ticket: ticket.status == Ticket.UNRESOLVED, tickets))
+            resolved_tickets = total_tickets - unresolved_tickets
+
+            return render(request, 'administration/dashboard.html', {'user': user, 'tickets': tickets,
+                                                                     'total_tickets': total_tickets,
+                                                                     'unresolved_tickets': unresolved_tickets,
+                                                                     'resolved_tickets': resolved_tickets})
         elif user.type == 'M':
             manager = Manager.objects.get(user_profile=user)
             related_toilets = Toilet.objects.filter(providers__manager=manager)
             tickets = Ticket.objects.filter(toilet__in=related_toilets)
-            return render(request, 'manager/dashboard.html', {'user': user, 'manager': manager, 'tickets': tickets})
+
+            total_tickets = len(tickets)
+            unresolved_tickets = len(filter(lambda ticket: ticket.status == Ticket.UNRESOLVED, tickets))
+            resolved_tickets = total_tickets - unresolved_tickets
+
+            return render(request, 'manager/dashboard.html', {'user': user, 'manager': manager, 'tickets': tickets,
+                                                              'total_tickets': total_tickets,
+                                                              'unresolved_tickets': unresolved_tickets,
+                                                              'resolved_tickets': resolved_tickets})
         elif user.type == 'P':
             tickets = Ticket.objects.filter(provider__user_profile=user)
-            return render(request, 'provider/dashboard.html', {'user': user, 'tickets': tickets})
+
+            total_tickets = len(tickets)
+            unresolved_tickets = len(filter(lambda ticket: ticket.status == Ticket.UNRESOLVED, tickets))
+            resolved_tickets = total_tickets - unresolved_tickets
+
+            return render(request, 'provider/dashboard.html', {'user': user, 'tickets': tickets,
+                                                               'total_tickets': total_tickets,
+                                                               'unresolved_tickets': unresolved_tickets,
+                                                               'resolved_tickets': resolved_tickets})
         return HttpResponse("Invalid User")
