@@ -1,4 +1,4 @@
-from django.forms import ModelForm
+from django.forms import ModelForm, ChoiceField
 from .models import Admin, Problem, ProblemCategory, Toilet, UserProfile
 from reporting.models import Ticket
 from crispy_forms.helper import FormHelper
@@ -48,11 +48,32 @@ class ToiletForm(ModelForm):
 
 
 class TicketForm(ModelForm):
+    status = ChoiceField(choices=Ticket.STATUS_CHOICES, required=True)
+
     def __init__(self, *args, **kwargs):
         super(TicketForm, self).__init__(*args, **kwargs)
-
-        self.helper = FormHelper(self)
-        self.helper.layout.append(Submit('submit', 'Add Ticket'))
+        self.fields['ticket_id'].widget.attrs.update({
+            'class': 'form-control col-md-7 col-xs-12',
+            'required': 'required'
+        })
+        self.fields['phone_number'].widget.attrs.update({
+            'class': 'form-control col-md-7 col-xs-12',
+        })
+        self.fields['toilet'].widget.attrs.update({
+            'class': 'form-control col-md-7 col-xs-12',
+            'required': 'required'
+        })
+        self.fields['problem'].widget.attrs.update({
+            'class': 'form-control col-md-7 col-xs-12',
+            'required': 'required'
+        })
+        self.fields['provider'].widget.attrs.update({
+            'class': 'form-control col-md-7 col-xs-12',
+        })
+        self.fields['status'].widget.attrs.update({
+            'class': 'form-control col-md-7 col-xs-12',
+            'required': 'required'
+        })
 
     class Meta:
         model = Ticket

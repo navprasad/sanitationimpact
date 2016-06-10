@@ -12,6 +12,12 @@ class Ticket(models.Model):
     ESCALATED1 = 3
     ESCALATED2 = 4
 
+    STATUS_CHOICES = (
+        (0, 'Unresolved'),
+        (1, 'Resolved'),
+        (2, 'Cannot fix'),
+    )
+
     ticket_id = models.CharField(max_length=40, unique=True, db_index=True, default=uuid.uuid4)
     phone_number = models.CharField(max_length=15)
     timestamp = models.DateTimeField(auto_now_add=True, db_index=True)

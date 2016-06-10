@@ -101,14 +101,11 @@
                                             <div class="title_left"><h3>Tickets</h3></div>
 
                                             <div class="title_right">
-                                                <div class="col-md-5 col-sm-5 col-xs-12 form-group pull-right top_search">
-                                                    <div class="input-group">
-                                                        <input type="text" class="form-control"
-                                                               placeholder="Search for...">
-                                                        <span class="input-group-btn">
-                                                            <button class="btn btn-default" type="button">Go!</button>
-                                                        </span>
-                                                    </div>
+                                                <div class="pull-right">
+                                                    <a class="btn btn-round btn-primary"
+                                                       href="/reporting/report_problem/">
+                                                        Report Problem &nbsp;<span class="glyphicon glyphicon-plus"/>
+                                                    </a>
                                                 </div>
                                             </div>
                                         </div>
@@ -136,12 +133,21 @@
                                                             <tbody>
                                                             {% for ticket in tickets %}
                                                                 <tr>
-                                                                    <td>#</td>
                                                                     <td>
-                                                                        <a>{{ ticket.id }}</a>
+                                                                        <a href="
+                                                                        {% url 'report_problem_ticket' ticket.id %}"
+                                                                        >#</a>
+                                                                    </td>
+                                                                    <td>
+                                                                        <a href="
+                                                                        {% url 'report_problem_ticket' ticket.id %}"
+                                                                        >{{ ticket.id }}</a>
                                                                     </td>
                                                                     <td class="text-center">
-                                                                        {{ ticket.timestamp | date:"d.m.Y" }}
+                                                                        <a href="
+                                                                        {% url 'report_problem_ticket' ticket.id %}">
+                                                                            {{ ticket.timestamp | date:"d.m.Y, h:i A" }}
+                                                                        </a>
                                                                     </td>
                                                                     <td>
                                                                         {{ ticket.toilet.address }}
@@ -166,6 +172,8 @@
                                                                         {% endif %}
                                                                     </td>
                                                                     <td class="text-center">
+                                                                        <a href="
+                                                                        {% url 'report_problem_ticket' ticket.id %}">
                                                                         {% if ticket.status == 0 %}
                                                                             <button type="button"
                                                                                     class="btn btn-danger btn-xs">Unresolved
@@ -179,6 +187,7 @@
                                                                                     class="btn btn-warning btn-xs">Cannot Fix
                                                                             </button>
                                                                         {% endif %}
+                                                                        </a>
                                                                     </td>
                                                                     <td>
                                                                     {% if ticket.provider %}

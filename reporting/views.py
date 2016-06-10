@@ -2,12 +2,17 @@ import os
 import urllib2
 
 from django.conf import settings
+from django.core.urlresolvers import reverse
+from django.views.generic import View
+from django.shortcuts import render
+from django.http import HttpResponseRedirect
 from administration.views import send_sms
+from administration.forms import TicketForm
 from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from administration.models import Toilet, Problem
+from administration.models import Toilet, Problem, UserProfile
 from manager.models import Manager
 from provider.models import Provider
 from reporting.models import Ticket
@@ -31,7 +36,7 @@ class IsValidToilet(APIView):
         return Response({'success': True})
 
 
-class ReportProblem(APIView):
+class ReportProblemAPI(APIView):
     def post(self, request):
         serializer = ReportProblemSerializer(data=request.data)
         if not serializer.is_valid():
@@ -205,3 +210,80 @@ class GetAudioURL(APIView):
 
         audio_file_url = '/media/ticket_audio_files/' + file_name
         return Response({'success': True, 'audio_file_url': audio_file_url})
+
+
+class ReportProblem(View):
+    def get(self, request, ticket_id=None):
+        user = UserProfile.objects.get(user=request.user)
+        ticket = None
+        if ticket_id:
+            try:
+                ticket = Ticket.objects.get(pk=ticket_id)
+            except Ticket.DoesNotExist:
+                return render(request, 'reporting/report_problem.html', {'user': user, 'error': 'Invalid Ticket ID'})
+        ticket_form = TicketForm(instance=ticket)
+        return render(request, 'reporting/report_problem.html', {'user': user, 'ticket_form': ticket_form})
+
+    def post(self, request, ticket_id=None):
+        phone_number = request.POST.get('phone_number')
+        toilet_pk = request.POST.get('toilet')
+        problem_pk = request.POST.get('problem')
+        provider_pk = request.POST.get('provider')
+        status = request.POST.get('status')
+
+        try:
+            toilet = Toilet.objects.get(pk=toilet_pk)
+            problem = Problem.objects.get(pk=problem_pk)
+            if provider_pk:
+                provider = Provider.objects.get(pk=provider_pk)
+            else:
+                provider = None
+        except (Toilet.DoesNotExist, Problem.DoesNotExist, Provider.DoesNotExist):
+            user = UserProfile.objects.get(user=request.user)
+            ticket_form = TicketForm(data=request.POST)
+            return render(request, 'reporting/report_problem.html', {'user': user, 'ticket_form': ticket_form,
+                                                                     'error': "Invalid Input. Please enable "
+                                                                              "JavaScript for validation."})
+
+        if not provider:
+            providers = Provider.objects.filter(toilets__toilet_id=toilet.toilet_id, problems__id=problem.id)
+            if providers:
+                # TODO: Handle this better
+                provider = providers[0]
+
+        # TODO: handle update ticket
+        send_sms_to_reporter = True
+        if not phone_number:
+            send_sms_to_reporter = False
+            phone_number = 'NIL'
+
+        if ticket_id:
+            try:
+                ticket = Ticket.objects.get(pk=ticket_id)
+            except Ticket.DoesNotExist:
+                user = UserProfile.objects.get(user=request.user)
+                ticket_form = TicketForm(data=request.POST)
+                return render(request, 'reporting/report_problem.html', {'user': user, 'ticket_form': ticket_form,
+                                                                         'error': "Invalid Ticket ID."})
+            ticket.phone_number = phone_number
+            ticket.toilet = toilet
+            ticket.problem = problem
+            ticket.provider = provider
+            ticket.status = status
+            ticket.save()
+        else:
+            ticket = Ticket(phone_number=phone_number, toilet=toilet, problem=problem, provider=provider)
+            ticket.save()
+
+            # send sms to the phone_number
+            if send_sms_to_reporter:
+                message = "Your complaint have been registered. Ticket ID: " + str(ticket.id)
+                send_sms(phone_number, message)
+
+            # send sms to the provider
+            if provider:
+                message = "Complaint registered for Toilet ID: " + str(toilet.toilet_id) + ". Ticket ID: " + str(
+                    ticket.id)
+                send_sms(provider.user_profile.phone_number, message)
+
+        return HttpResponseRedirect(reverse('dashboard'))
