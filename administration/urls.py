@@ -2,7 +2,7 @@ from django.conf.urls import include, url
 from rest_framework import routers
 
 from administration.views import AdminViewSet, ProblemCategoryViewSet, ProblemViewSet, ToiletViewSet,\
-    ViewManagers, AddManager, ViewManager, DeleteManager,\
+    ViewManagers, AddManager, ViewManager, DeleteManager, EditManager,\
     ViewProviders, AddProvider, ViewProvider, DeleteProvider,\
     ViewToilets, AddToilet, DeleteToilet
 
@@ -19,6 +19,7 @@ urlpatterns = [
     url(r'^view_managers/$', ViewManagers.as_view(), name='view_managers'),
     url(r'^view_manager/(?P<manager_id>\d+)/$', ViewManager.as_view(), name='view_manager'),
     url(r'^add_manager/$', AddManager.as_view(), name='add_manager'),
+    url(r'^edit_manager/(?P<manager_id>\d+)/$', EditManager.as_view(), name='edit_manager'),
     url(r'^delete_manager/(?P<manager_id>\d+)/$', DeleteManager.as_view(), name='delete_manager'),
 
     url(r'^view_providers/$', ViewProviders.as_view(), name='view_providers'),

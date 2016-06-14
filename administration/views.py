@@ -6,6 +6,7 @@ from django.db import transaction
 from django.shortcuts import HttpResponseRedirect
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
+from django.forms.models import model_to_dict
 from requests.utils import quote
 from rest_framework import viewsets
 from rest_framework.response import Response
@@ -158,6 +159,90 @@ class ViewManager(View):
                                                           'resolved_tickets': resolved_tickets})
 
 
+class EditManager(View):
+    def get(self, request, manager_id):
+        user = UserProfile.objects.get(user=request.user)
+        manager = get_object_or_404(Manager, manager_id=manager_id)
+        user_profile_form = UserProfileForm(instance=manager.user_profile)
+        return render(request, 'administration/add_manager.html', {'user': user,
+                                                                   'user_profile_form': user_profile_form,
+                                                                   'first_name': manager.user_profile.user.first_name,
+                                                                   'last_name': manager.user_profile.user.last_name,
+                                                                   'username': manager.user_profile.user.username,
+                                                                   'manager_id': manager.manager_id,
+                                                                   'pin_code': manager.pin_code,
+                                                                   'email': manager.user_profile.user.email,
+                                                                   'picture': manager.user_profile.picture})
+
+    @transaction.atomic()
+    def post(self, request, manager_id):
+        user = UserProfile.objects.get(user=request.user)
+        manager = get_object_or_404(Manager, manager_id=manager_id)
+        user_profile_form = UserProfileForm(instance=manager.user_profile)
+
+        default_context = {'user': user,
+                           'error': 'Please enable JavaScript',
+                           'user_profile_form': user_profile_form}
+
+        default_context['first_name'] = request.POST.get('first_name')
+        default_context['last_name'] = request.POST.get('last_name')
+        default_context['username'] = request.POST.get('username')
+        default_context['password'] = request.POST.get('password')
+        default_context['manager_id'] = manager_id
+        default_context['pin_code'] = request.POST.get('pin_code')
+        default_context['email'] = request.POST.get('email')
+        default_context['phone_number'] = request.POST.get('phone_number')
+        default_context['address'] = request.POST.get('address')
+        default_context['picture'] = request.FILES.get('picture')
+
+        serializer = AddManagerSerializer(data=request.POST)
+        if not serializer.is_valid():
+            return render(request, 'administration/add_manager.html', default_context)
+
+        first_name = serializer.validated_data['first_name']
+        last_name = serializer.validated_data['last_name']
+        password = serializer.validated_data['password']
+        pin_code = serializer.validated_data['pin_code']
+        email = serializer.validated_data['email']
+        if not email:
+            email = serializer.validated_data['username'] + "@example.com"
+        phone_number = serializer.validated_data['phone_number']
+        address = serializer.validated_data['address']
+        if request.FILES:
+            picture = request.FILES['picture']
+        else:
+            picture = None
+
+        try:
+            email_user = User.objects.get(email=email)
+            if email_user != manager.user_profile.user:
+                default_context['error'] = 'Email already exists!'
+                return render(request, 'administration/add_manager.html', default_context)
+        except User.DoesNotExist:
+            pass
+
+        user_profile = manager.user_profile
+        user = user_profile.user
+
+        user.first_name = first_name
+        user.last_name = last_name
+        if password:
+            user.set_password(password)
+        user.email = email
+        user.save()
+
+        user_profile.phone_number = phone_number
+        user_profile.address = address
+        if picture:
+            user_profile.picture = picture
+        user_profile.save()
+
+        manager.pin_code = pin_code
+        manager.save()
+
+        return HttpResponseRedirect("/administration/view_manager/%s/" % manager.manager_id)
+
+
 class DeleteManager(View):
     def get(self, request, manager_id):
         try:
@@ -165,6 +250,7 @@ class DeleteManager(View):
         except Manager.DoesNotExist:
             pass
         return HttpResponseRedirect(reverse('view_managers'))
+
 
 """
 End: Views for managing managers
@@ -296,6 +382,7 @@ class DeleteProvider(View):
             pass
         return HttpResponseRedirect(reverse('view_providers'))
 
+
 """
 End: Views for managing providers
 """
@@ -354,6 +441,7 @@ class DeleteToilet(View):
         except Toilet.DoesNotExist:
             pass
         return HttpResponseRedirect(reverse('view_toilets'))
+
 
 """
 End: Views for managing toilets
