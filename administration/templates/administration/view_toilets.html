@@ -83,6 +83,7 @@
                                                 <th>Paid/Free</th>
                                                 <th>Type</th>
                                                 <th>Location Code</th>
+                                                <th>Edit</th>
                                                 <th>Delete</th>
                                             </tr>
                                             </thead>
@@ -118,6 +119,12 @@
                                                     {% endif %}
                                                 </td>
                                                 <td>{{ toilet.location_code }}</td>
+                                                <td>
+                                                    <a class="btn btn-primary btn-xs"
+                                                       href="{% url 'edit_toilet' toilet.toilet_id %}">
+                                                       Edit
+                                                    </a>
+                                                </td>
                                                 <td>
                                                     <button type="button" class="btn btn-danger btn-xs"
                                                             data-toggle="modal"

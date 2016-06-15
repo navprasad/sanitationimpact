@@ -4,7 +4,7 @@ from rest_framework import routers
 from administration.views import AdminViewSet, ProblemCategoryViewSet, ProblemViewSet, ToiletViewSet,\
     ViewManagers, AddManager, ViewManager, DeleteManager, EditManager,\
     ViewProviders, AddProvider, ViewProvider, DeleteProvider, EditProvider,\
-    ViewToilets, AddToilet, DeleteToilet
+    ViewToilets, AddToilet, EditToilet, DeleteToilet
 
 router = routers.DefaultRouter()
 router.register(r'admin', AdminViewSet)
@@ -30,5 +30,6 @@ urlpatterns = [
 
     url(r'^view_toilets/$', ViewToilets.as_view(), name='view_toilets'),
     url(r'^add_toilet/$', AddToilet.as_view(), name='add_toilet'),
+    url(r'^edit_toilet/(?P<toilet_id>\d+)/$', EditToilet.as_view(), name='edit_toilet'),
     url(r'^delete_toilet/(?P<toilet_id>\d+)/$', DeleteToilet.as_view(), name='delete_toilet'),
 ]

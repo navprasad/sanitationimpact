@@ -552,6 +552,62 @@ class AddToilet(View):
         return HttpResponseRedirect("/administration/view_toilets/")
 
 
+class EditToilet(View):
+    def get(self, request, toilet_id):
+        user = UserProfile.objects.get(user=request.user)
+        toilet = get_object_or_404(Toilet, toilet_id=toilet_id)
+        toilet_form = ToiletForm(instance=toilet)
+        return render(request, 'administration/add_toilet.html', {'user': user,
+                                                                  'toilet_form': toilet_form})
+
+    @transaction.atomic()
+    def post(self, request, toilet_id):
+        user = UserProfile.objects.get(user=request.user)
+        toilet = get_object_or_404(Toilet, toilet_id=toilet_id)
+
+        address = request.POST.get('address')
+        toilet_id = request.POST.get('toilet_id')
+        sex = request.POST.get('sex')
+        payment = request.POST.get('payment')
+        type = request.POST.get('type')
+        location_code = request.POST.get('location_code')
+
+        if not address or not toilet_id:
+            toilet_form = ToiletForm(data=request.POST)
+            return render(request, 'administration/add_toilet.html', {'user': user,
+                                                                      'error': 'Please enable javascript!',
+                                                                      'toilet_form': toilet_form})
+        try:
+            test_toilet = Toilet.objects.get(toilet_id=toilet_id)
+            if test_toilet != toilet:
+                toilet_form = ToiletForm(data=request.POST)
+                return render(request, 'administration/add_toilet.html', {'user': user,
+                                                                          'error': 'Toilet ID already exists!',
+                                                                          'toilet_form': toilet_form})
+        except Toilet.DoesNotExist:
+            pass
+
+        if not sex:
+            sex = 'B'
+        if not payment:
+            payment = 'F'
+        if not type:
+            type = 'P'
+        if not location_code:
+            location_code = ''
+
+        # Edit Toilet
+        toilet.toilet_id = toilet_id
+        toilet.address = address
+        toilet.sex = sex
+        toilet.payment = payment
+        toilet.type = type
+        toilet.location_code = location_code
+        toilet.save()
+
+        return HttpResponseRedirect("/administration/view_toilets/")
+
+
 class DeleteToilet(View):
     def get(self, request, toilet_id):
         try:
