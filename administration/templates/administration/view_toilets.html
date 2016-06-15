@@ -79,6 +79,10 @@
                                                 <th>#</th>
                                                 <th>Toilet ID</th>
                                                 <th>Address</th>
+                                                <th>Male/Female</th>
+                                                <th>Paid/Free</th>
+                                                <th>Type</th>
+                                                <th>Location Code</th>
                                                 <th>Delete</th>
                                             </tr>
                                             </thead>
@@ -88,6 +92,32 @@
                                                 <th scope="row">{{ forloop.counter }}</th>
                                                 <td>{{ toilet.toilet_id }}</td>
                                                 <td>{{ toilet.address }}</td>
+                                                <td>
+                                                    {% if toilet.sex == 'B' %}
+                                                    Both
+                                                    {% elif toilet.sex == 'M' %}
+                                                    Male
+                                                    {% elif toilet.sex == 'F' %}
+                                                    Female
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    {% if toilet.payment == 'P' %}
+                                                    Paid
+                                                    {% elif toilet.payment == 'F' %}
+                                                    Free
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    {% if toilet.type == 'C' %}
+                                                    Communal
+                                                    {% elif toilet.type == 'P' %}
+                                                    Public
+                                                    {% elif toilet.type == 'S' %}
+                                                    School
+                                                    {% endif %}
+                                                </td>
+                                                <td>{{ toilet.location_code }}</td>
                                                 <td>
                                                     <button type="button" class="btn btn-danger btn-xs"
                                                             data-toggle="modal"

@@ -516,9 +516,13 @@ class AddToilet(View):
 
         address = request.POST.get('address')
         toilet_id = request.POST.get('toilet_id')
+        sex = request.POST.get('sex')
+        payment = request.POST.get('payment')
+        type = request.POST.get('type')
+        location_code = request.POST.get('location_code')
 
         if not address or not toilet_id:
-            toilet_form = ToiletForm()
+            toilet_form = ToiletForm(data=request.POST)
             return render(request, 'administration/add_toilet.html', {'user': user,
                                                                       'error': 'Please enable javascript!',
                                                                       'toilet_form': toilet_form})
@@ -531,8 +535,18 @@ class AddToilet(View):
         except Toilet.DoesNotExist:
             pass
 
+        if not sex:
+            sex = 'B'
+        if not payment:
+            payment = 'F'
+        if not type:
+            type = 'P'
+        if not location_code:
+            location_code = ''
+
         # Create Toilet
-        toilet = Toilet(toilet_id=toilet_id, address=address)
+        toilet = Toilet(toilet_id=toilet_id, address=address, sex=sex, payment=payment, type=type,
+                        location_code=location_code)
         toilet.save()
 
         return HttpResponseRedirect("/administration/view_toilets/")

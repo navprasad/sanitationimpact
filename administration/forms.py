@@ -45,6 +45,22 @@ class ToiletForm(ModelForm):
             'class': 'form-control col-md-7 col-xs-12',
             'required': 'required'
         })
+        self.fields['sex'].widget.attrs.update({
+            'class': 'form-control col-md-7 col-xs-12',
+            'required': 'required'
+        })
+        self.fields['payment'].widget.attrs.update({
+            'class': 'form-control col-md-7 col-xs-12',
+            'required': 'required'
+        })
+        self.fields['type'].widget.attrs.update({
+            'class': 'form-control col-md-7 col-xs-12',
+            'required': 'required'
+        })
+        self.fields['location_code'].widget.attrs.update({
+            'class': 'form-control col-md-7 col-xs-12',
+            'required': 'required'
+        })
 
 
 class TicketForm(ModelForm):

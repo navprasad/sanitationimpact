@@ -78,8 +78,28 @@ class Problem(models.Model):
 
 
 class Toilet(models.Model):
+    SEX_CHOICES = (
+        ('B', 'Both'),
+        ('M', 'Male'),
+        ('F', 'Female')
+    )
+    PAY_CHOICES = (
+        ('P', 'Paid'),
+        ('F', 'Free')
+    )
+    TYPE_CHOICES = (
+        ('C', 'Communal'),
+        ('P', 'Public'),
+        ('S', 'School')
+    )
+
     toilet_id = models.CharField(max_length=100, unique=True, db_index=True)
     address = models.TextField()
+
+    sex = models.CharField(max_length=1, choices=SEX_CHOICES, default='B')
+    payment = models.CharField(max_length=1, choices=PAY_CHOICES, default='F')
+    type = models.CharField(max_length=1, choices=TYPE_CHOICES, default='P')
+    location_code = models.CharField(max_length=10, default='')
 
     def __unicode__(self):
         return str(self.toilet_id) + ': ' + self.address
