@@ -374,6 +374,110 @@ class ViewProvider(View):
                                                            'resolved_tickets': resolved_tickets})
 
 
+class EditProvider(View):
+    def get(self, request, provider_id):
+        user = UserProfile.objects.get(user=request.user)
+        provider = get_object_or_404(Provider, provider_id=provider_id)
+        user_profile_form = UserProfileForm(instance=provider.user_profile)
+        provider_form = ProviderForm(instance=provider)
+        return render(request, 'administration/add_provider.html', {'user': user,
+                                                                    'user_profile_form': user_profile_form,
+                                                                    'provider_form': provider_form,
+                                                                    'first_name': provider.user_profile.user.first_name,
+                                                                    'last_name': provider.user_profile.user.last_name,
+                                                                    'username': provider.user_profile.user.username,
+                                                                    'provider_id': provider.provider_id,
+                                                                    'pin_code': provider.pin_code,
+                                                                    'email': provider.user_profile.user.email,
+                                                                    'picture': provider.user_profile.picture})
+
+    @transaction.atomic()
+    def post(self, request, provider_id):
+        """
+
+        """
+        user = UserProfile.objects.get(user=request.user)
+        provider = get_object_or_404(Provider, provider_id=provider_id)
+        user_profile_form = UserProfileForm(instance=provider.user_profile)
+        provider_form = ProviderForm(instance=provider)
+
+        default_context = {'user': user,
+                           'error': 'Please enable JavaScript',
+                           'user_profile_form': user_profile_form,
+                           'provider_form': provider_form}
+
+        default_context['first_name'] = request.POST.get('first_name')
+        default_context['last_name'] = request.POST.get('last_name')
+        default_context['username'] = request.POST.get('username')
+        default_context['password'] = request.POST.get('password')
+        default_context['provider_id'] = provider_id
+        default_context['pin_code'] = request.POST.get('pin_code')
+        default_context['email'] = request.POST.get('email')
+        default_context['phone_number'] = request.POST.get('phone_number')
+        default_context['manager_id'] = request.POST.get('manager')
+        default_context['toilets'] = request.POST.getlist('toilets')
+        default_context['problems'] = request.POST.getlist('problems')
+        default_context['address'] = request.POST.get('address')
+        default_context['picture'] = request.FILES.get('picture')
+
+        serializer = AddProviderSerializer(data=request.POST)
+        if not serializer.is_valid():
+            return render(request, 'administration/add_provider.html', default_context)
+
+        first_name = serializer.validated_data['first_name']
+        last_name = serializer.validated_data['last_name']
+        password = serializer.validated_data['password']
+        email = serializer.validated_data['email']
+        if not email:
+            email = serializer.validated_data['username'] + "@example.com"
+        pin_code = serializer.validated_data['pin_code']
+        manager = serializer.validated_data['manager']
+        phone_number = serializer.validated_data['phone_number']
+        address = serializer.validated_data['address']
+        picture = None
+        if request.FILES:
+            picture = request.FILES['picture']
+        toilets = serializer.validated_data['toilets']
+        problems = serializer.validated_data['problems']
+
+        try:
+            email_user = User.objects.get(email=email)
+            if email_user != provider.user_profile.user:
+                default_context['error'] = 'Email already exists!'
+                return render(request, 'administration/add_provider.html', default_context)
+        except User.DoesNotExist:
+            pass
+
+        user_profile = provider.user_profile
+        user = user_profile.user
+
+        # save user details
+        user.first_name = first_name
+        user.last_name = last_name
+        if password:
+            user.set_password(password)
+        user.email = email
+        user.save()
+
+        # save user_profile details
+        user_profile.phone_number = phone_number
+        user_profile.address = address
+        if picture:
+            user_profile.picture = picture
+        user_profile.save()
+
+        # save provider details
+        provider.pin_code = pin_code
+        provider.manager = manager
+        provider.toilets.clear()
+        provider.toilets.add(*toilets)
+        provider.problems.clear()
+        provider.problems.add(*problems)
+        provider.save()
+
+        return HttpResponseRedirect("/administration/view_provider/%s/" % provider.provider_id)
+
+
 class DeleteProvider(View):
     def get(self, request, provider_id):
         try:
