@@ -230,6 +230,8 @@ class ReportProblem(View):
         problem_pk = request.POST.get('problem')
         provider_pk = request.POST.get('provider')
         status = request.POST.get('status')
+        provider_remarks = request.POST.get('provider_remarks')
+        user_remarks = request.POST.get('user_remarks')
 
         try:
             toilet = Toilet.objects.get(pk=toilet_pk)
@@ -270,9 +272,12 @@ class ReportProblem(View):
             ticket.problem = problem
             ticket.provider = provider
             ticket.status = status
+            ticket.provider_remarks = provider_remarks
+            ticket.user_remarks = user_remarks
             ticket.save()
         else:
-            ticket = Ticket(phone_number=phone_number, toilet=toilet, problem=problem, provider=provider)
+            ticket = Ticket(phone_number=phone_number, toilet=toilet, problem=problem, provider=provider,
+                            provider_remarks=provider_remarks, user_remarks=user_remarks)
             ticket.save()
 
             # send sms to the phone_number

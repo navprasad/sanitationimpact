@@ -90,6 +90,14 @@ class TicketForm(ModelForm):
             'class': 'form-control col-md-7 col-xs-12',
             'required': 'required'
         })
+        self.fields['provider_remarks'].widget.attrs.update({
+            'rows': 3,
+            'class': 'form-control',
+        })
+        self.fields['user_remarks'].widget.attrs.update({
+            'rows': 3,
+            'class': 'form-control',
+        })
 
     class Meta:
         model = Ticket

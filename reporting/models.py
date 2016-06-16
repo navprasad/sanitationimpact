@@ -27,6 +27,8 @@ class Ticket(models.Model):
     status = models.IntegerField(default=UNRESOLVED)
     is_audio_present = models.BooleanField(default=False)
     is_provider_audio_present = models.BooleanField(default=False)
+    provider_remarks = models.TextField(blank=True, default='')
+    user_remarks = models.TextField(blank=True, default='')
 
     def __unicode__(self):
         return str(self.id)
