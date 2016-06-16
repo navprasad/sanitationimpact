@@ -91,6 +91,7 @@ class AddManager(View):
         password = serializer.validated_data['password']
         manager_id = serializer.validated_data['manager_id']
         pin_code = serializer.validated_data['pin_code']
+        description = serializer.validated_data['description']
 
         try:
             Manager.objects.get(manager_id=manager_id)
@@ -137,7 +138,7 @@ class AddManager(View):
         user_profile.picture = picture
         user_profile.save()
 
-        Manager(user_profile=user_profile, manager_id=manager_id, pin_code=pin_code).save()
+        Manager(user_profile=user_profile, manager_id=manager_id, pin_code=pin_code, description=description).save()
 
         return HttpResponseRedirect("/administration/view_manager/%s/" % manager_id)
 
@@ -171,6 +172,7 @@ class EditManager(View):
                                                                    'username': manager.user_profile.user.username,
                                                                    'manager_id': manager.manager_id,
                                                                    'pin_code': manager.pin_code,
+                                                                   'description': manager.description,
                                                                    'email': manager.user_profile.user.email,
                                                                    'picture': manager.user_profile.picture})
 
@@ -193,6 +195,7 @@ class EditManager(View):
         default_context['email'] = request.POST.get('email')
         default_context['phone_number'] = request.POST.get('phone_number')
         default_context['address'] = request.POST.get('address')
+        default_context['description'] = request.POST.get('description')
         default_context['picture'] = request.FILES.get('picture')
 
         serializer = AddManagerSerializer(data=request.POST)
@@ -203,6 +206,7 @@ class EditManager(View):
         last_name = serializer.validated_data['last_name']
         password = serializer.validated_data['password']
         pin_code = serializer.validated_data['pin_code']
+        description = serializer.validated_data['description']
         email = serializer.validated_data['email']
         if not email:
             email = serializer.validated_data['username'] + "@example.com"
@@ -238,6 +242,7 @@ class EditManager(View):
         user_profile.save()
 
         manager.pin_code = pin_code
+        manager.description = description
         manager.save()
 
         return HttpResponseRedirect("/administration/view_manager/%s/" % manager.manager_id)
@@ -349,8 +354,10 @@ class AddProvider(View):
         pin_code = serializer.validated_data['pin_code']
         toilets = serializer.validated_data['toilets']
         problems = serializer.validated_data['problems']
+        description = serializer.validated_data['description']
 
-        provider = Provider(user_profile=user_profile, provider_id=provider_id, pin_code=pin_code, manager=manager)
+        provider = Provider(user_profile=user_profile, provider_id=provider_id, pin_code=pin_code, manager=manager,
+                            description=description)
         provider.save()
         provider.toilets.add(*toilets)
         provider.problems.add(*problems)
@@ -418,6 +425,7 @@ class EditProvider(View):
         default_context['toilets'] = request.POST.getlist('toilets')
         default_context['problems'] = request.POST.getlist('problems')
         default_context['address'] = request.POST.get('address')
+        default_context['description'] = request.POST.get('description')
         default_context['picture'] = request.FILES.get('picture')
 
         serializer = AddProviderSerializer(data=request.POST)
@@ -434,6 +442,7 @@ class EditProvider(View):
         manager = serializer.validated_data['manager']
         phone_number = serializer.validated_data['phone_number']
         address = serializer.validated_data['address']
+        description = serializer.validated_data['description']
         picture = None
         if request.FILES:
             picture = request.FILES['picture']
@@ -469,6 +478,7 @@ class EditProvider(View):
         # save provider details
         provider.pin_code = pin_code
         provider.manager = manager
+        provider.description = description
         provider.toilets.clear()
         provider.toilets.add(*toilets)
         provider.problems.clear()

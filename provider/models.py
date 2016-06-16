@@ -12,6 +12,7 @@ class Provider(models.Model):
     manager = models.ForeignKey(Manager, related_name='providers', on_delete=models.CASCADE)
     toilets = models.ManyToManyField(Toilet, related_name='providers')
     problems = models.ManyToManyField(Problem, related_name='providers')
+    description = models.TextField(blank=True, default='')
 
     def __unicode__(self):
         return "%s %s (%s)" % (

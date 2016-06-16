@@ -7,6 +7,7 @@ class Manager(models.Model):
 
     manager_id = models.CharField(max_length=100, unique=True, db_index=True)
     pin_code = models.CharField(max_length=10)
+    description = models.TextField(blank=True, default='')
 
     def delete(self, *args, **kwargs):
         self.user_profile.delete()

@@ -20,19 +20,7 @@ class ProviderForm(ModelForm):
             'class': 'form-control',
             'required': 'required'
         })
-        """
-        self.fields['phone_number'].widget.attrs.update({
-            'class': 'form-control col-md-7 col-xs-12',
-            'required': 'required'
-        })
-        self.fields['address'].widget.attrs.update({
+        self.fields['description'].widget.attrs.update({
             'rows': 3,
             'class': 'form-control',
-            'required': 'required'
         })
-        self.fields['picture'].widget.attrs.update({
-            'class': 'form-control',
-            'style': 'border: 0px',
-            'accept': 'image'
-        })
-        """

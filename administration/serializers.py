@@ -34,6 +34,7 @@ class AddManagerSerializer(serializers.Serializer):
     email = serializers.CharField(max_length=254, allow_blank=True)
     phone_number = serializers.CharField(max_length=30)
     address = serializers.CharField()
+    description = serializers.CharField(allow_blank=True)
 
 
 class AddProviderSerializer(serializers.Serializer):
@@ -49,3 +50,4 @@ class AddProviderSerializer(serializers.Serializer):
     manager = serializers.PrimaryKeyRelatedField(queryset=Manager.objects.all())
     toilets = serializers.PrimaryKeyRelatedField(queryset=Toilet.objects.all(), many=True)
     problems = serializers.PrimaryKeyRelatedField(queryset=Problem.objects.all(), many=True)
+    description = serializers.CharField(allow_blank=True)
