@@ -57,6 +57,10 @@ class ToiletForm(ModelForm):
             'class': 'form-control col-md-7 col-xs-12',
             'required': 'required'
         })
+        self.fields['area'].widget.attrs.update({
+            'class': 'form-control col-md-7 col-xs-12',
+            'required': 'required'
+        })
         self.fields['location_code'].widget.attrs.update({
             'class': 'form-control col-md-7 col-xs-12',
             'required': 'required'

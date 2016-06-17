@@ -81,6 +81,7 @@
                                                 <th>Address</th>
                                                 <th>Male/Female</th>
                                                 <th>Paid/Free</th>
+                                                <th>Area</th>
                                                 <th>Type</th>
                                                 <th>Location Code</th>
                                                 <th>Edit</th>
@@ -107,11 +108,24 @@
                                                     Paid
                                                     {% elif toilet.payment == 'F' %}
                                                     Free
+                                                    {% elif toilet.payment == 'B' %}
+                                                    Both (Pay + No Pay)
+                                                    {% elif toilet.payment == 'H' %}
+                                                    Household Contribution
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    {% if toilet.area == 'R' %}
+                                                    Rural
+                                                    {% elif toilet.area == 'U' %}
+                                                    Urban
+                                                    {% elif toilet.area == 'PU' %}
+                                                    Peri Urban
                                                     {% endif %}
                                                 </td>
                                                 <td>
                                                     {% if toilet.type == 'C' %}
-                                                    Communal
+                                                    Community
                                                     {% elif toilet.type == 'P' %}
                                                     Public
                                                     {% elif toilet.type == 'S' %}

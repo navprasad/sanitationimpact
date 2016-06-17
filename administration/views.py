@@ -549,6 +549,7 @@ class AddToilet(View):
         payment = request.POST.get('payment')
         type = request.POST.get('type')
         location_code = request.POST.get('location_code')
+        area = request.POST.get('area')
 
         if not address or not toilet_id:
             toilet_form = ToiletForm(data=request.POST)
@@ -570,12 +571,14 @@ class AddToilet(View):
             payment = 'F'
         if not type:
             type = 'P'
+        if not area:
+            area = 'R'
         if not location_code:
             location_code = ''
 
         # Create Toilet
         toilet = Toilet(toilet_id=toilet_id, address=address, sex=sex, payment=payment, type=type,
-                        location_code=location_code)
+                        location_code=location_code, area=area)
         toilet.save()
 
         return HttpResponseRedirect("/administration/view_toilets/")
@@ -599,6 +602,7 @@ class EditToilet(View):
         sex = request.POST.get('sex')
         payment = request.POST.get('payment')
         type = request.POST.get('type')
+        area = request.POST.get('area')
         location_code = request.POST.get('location_code')
 
         if not address or not toilet_id:
@@ -622,6 +626,8 @@ class EditToilet(View):
             payment = 'F'
         if not type:
             type = 'P'
+        if not area:
+            area = 'R'
         if not location_code:
             location_code = ''
 
@@ -632,6 +638,7 @@ class EditToilet(View):
         toilet.payment = payment
         toilet.type = type
         toilet.location_code = location_code
+        toilet.area = area
         toilet.save()
 
         return HttpResponseRedirect("/administration/view_toilets/")

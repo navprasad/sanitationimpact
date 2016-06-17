@@ -83,12 +83,19 @@ class Toilet(models.Model):
         ('M', 'Male'),
         ('F', 'Female')
     )
+    AREA_CHOICES = (
+        ('R', 'Rural'),
+        ('U', 'Urban'),
+        ('PU', 'Peri Urban')
+    )
     PAY_CHOICES = (
         ('P', 'Paid'),
-        ('F', 'Free')
+        ('F', 'Free'),
+        ('B', 'Both (Pay + No Pay)'),
+        ('H', 'Household Contribution')
     )
     TYPE_CHOICES = (
-        ('C', 'Communal'),
+        ('C', 'Community'),
         ('P', 'Public'),
         ('S', 'School'),
         ('W', 'Women Sanitation Complex')
@@ -100,6 +107,7 @@ class Toilet(models.Model):
     sex = models.CharField(max_length=1, choices=SEX_CHOICES, default='B')
     payment = models.CharField(max_length=1, choices=PAY_CHOICES, default='F')
     type = models.CharField(max_length=1, choices=TYPE_CHOICES, default='P')
+    area = models.CharField(max_length=2, choices=AREA_CHOICES, default='R')
     location_code = models.CharField(max_length=10, default='')
 
     def __unicode__(self):
