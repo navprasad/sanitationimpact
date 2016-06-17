@@ -18,6 +18,7 @@ from administration.serializers import AdminSerializer, ProblemCategorySerialize
 from manager.models import Manager
 from provider.models import Provider
 from provider.forms import ProviderForm
+from manager.forms import ManagerForm
 from reporting.models import Ticket
 
 
@@ -71,18 +72,22 @@ class AddManager(View):
     def get(self, request):
         user = UserProfile.objects.get(user=request.user)
         user_profile_form = UserProfileForm()
+        manager_form = ManagerForm()
         return render(request, 'administration/add_manager.html', {'user': user,
+                                                                   'manager_form': manager_form,
                                                                    'user_profile_form': user_profile_form})
 
     @transaction.atomic()
     def post(self, request):
         user = UserProfile.objects.get(user=request.user)
+        manager_form = ManagerForm()
         user_profile_form = UserProfileForm()
 
         serializer = AddManagerSerializer(data=request.POST)
         if not serializer.is_valid():
             return render(request, 'administration/add_manager.html', {'user': user,
                                                                        'error': 'Please enable JavaScript',
+                                                                       'manager_form': manager_form,
                                                                        'user_profile_form': user_profile_form})
         first_name = serializer.validated_data['first_name']
         last_name = serializer.validated_data['last_name']
@@ -96,6 +101,7 @@ class AddManager(View):
             Manager.objects.get(manager_id=manager_id)
             return render(request, 'administration/add_manager.html', {'user': user,
                                                                        'error': 'Manager ID already exists!',
+                                                                       'manager_form': manager_form,
                                                                        'user_profile_form': user_profile_form})
         except Manager.DoesNotExist:
             pass
@@ -107,6 +113,7 @@ class AddManager(View):
             email = username + "@example.com"
         phone_number = serializer.validated_data['phone_number']
         address = serializer.validated_data['address']
+        manager_code = serializer.validated_data['manager_code']
 
         if request.FILES:
             picture = request.FILES['picture']
@@ -117,6 +124,7 @@ class AddManager(View):
             User.objects.get(username=username)
             return render(request, 'administration/add_manager.html', {'user': user,
                                                                        'error': 'Username already exists!',
+                                                                       'manager_form': manager_form,
                                                                        'user_profile_form': user_profile_form})
         except User.DoesNotExist:
             pass
@@ -124,6 +132,7 @@ class AddManager(View):
             User.objects.get(email=email)
             return render(request, 'administration/add_manager.html', {'user': user,
                                                                        'error': 'Email already exists!',
+                                                                       'manager_form': manager_form,
                                                                        'user_profile_form': user_profile_form})
         except User.DoesNotExist:
             pass
@@ -137,7 +146,8 @@ class AddManager(View):
         user_profile.picture = picture
         user_profile.save()
 
-        Manager(user_profile=user_profile, manager_id=manager_id, pin_code=pin_code, description=description).save()
+        Manager(user_profile=user_profile, manager_id=manager_id, pin_code=pin_code, description=description,
+                manager_code=manager_code).save()
 
         return HttpResponseRedirect("/administration/view_manager/%s/" % manager_id)
 
@@ -164,8 +174,10 @@ class EditManager(View):
         user = UserProfile.objects.get(user=request.user)
         manager = get_object_or_404(Manager, manager_id=manager_id)
         user_profile_form = UserProfileForm(instance=manager.user_profile)
+        manager_form = ManagerForm(instance=manager)
         return render(request, 'administration/add_manager.html', {'user': user,
                                                                    'user_profile_form': user_profile_form,
+                                                                   'manager_form': manager_form,
                                                                    'first_name': manager.user_profile.user.first_name,
                                                                    'last_name': manager.user_profile.user.last_name,
                                                                    'username': manager.user_profile.user.username,
@@ -180,9 +192,11 @@ class EditManager(View):
         user = UserProfile.objects.get(user=request.user)
         manager = get_object_or_404(Manager, manager_id=manager_id)
         user_profile_form = UserProfileForm(instance=manager.user_profile)
+        manager_form = ManagerForm(instance=manager)
 
         default_context = {'user': user,
                            'error': 'Please enable JavaScript',
+                           'manager_form': manager_form,
                            'user_profile_form': user_profile_form}
 
         default_context['first_name'] = request.POST.get('first_name')
@@ -211,6 +225,7 @@ class EditManager(View):
             email = serializer.validated_data['username'] + "@example.com"
         phone_number = serializer.validated_data['phone_number']
         address = serializer.validated_data['address']
+        manager_code = serializer.validated_data['manager_code']
         if request.FILES:
             picture = request.FILES['picture']
         else:
@@ -242,6 +257,7 @@ class EditManager(View):
 
         manager.pin_code = pin_code
         manager.description = description
+        manager.manager_code = manager_code
         manager.save()
 
         return HttpResponseRedirect("/administration/view_manager/%s/" % manager.manager_id)

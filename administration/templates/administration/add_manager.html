@@ -42,7 +42,7 @@
                             <!-- First Name -->
                             <div class="form-group">
                                 <label class="control-label col-md-3 col-sm-3 col-xs-12" for="id_first_name">First Name
-                                            <span class="required">*</span>
+                                    <span class="required">*</span>
                                 </label>
                                 <div class="col-md-6 col-sm-6 col-xs-12">
                                     <input type="text" id="id_first_name" name="first_name" required="required"
@@ -86,6 +86,16 @@
                                 </div>
                             </div>
                             <!-- /Password -->
+                            <!-- Manager Code -->
+                            <div class="form-group">
+                                <label class="control-label col-md-3 col-sm-3 col-xs-12" for="id_manager_code">Manager Code
+                                    <span class="required">*</span>
+                                </label>
+                                <div class="col-md-6 col-sm-6 col-xs-12">
+                                    {{ manager_form.manager_code }}
+                                </div>
+                            </div>
+                            <!-- /Manager Code -->
                             <!-- Manager ID -->
                             <div class="form-group">
                                 <label class="control-label col-md-3 col-sm-3 col-xs-12" for="id_manager_id"> Manager ID

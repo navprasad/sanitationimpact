@@ -35,6 +35,7 @@ class AddManagerSerializer(serializers.Serializer):
     phone_number = serializers.CharField(max_length=30)
     address = serializers.CharField()
     description = serializers.CharField(allow_blank=True)
+    manager_code = serializers.CharField(max_length=5)
 
 
 class AddProviderSerializer(serializers.Serializer):
