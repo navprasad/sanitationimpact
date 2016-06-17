@@ -9,7 +9,7 @@ import reporting.urls
 
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
-from msanitation.views import Login, DashBoard, LogOut
+from msanitation.views import Login, DashBoard, Profile, LogOut
 
 admin.autodiscover()
 
@@ -20,6 +20,7 @@ urlpatterns = [
     url(r'^login/$', Login.as_view(), name='login'),
     url(r'^logout/$', LogOut.as_view(), name='logout'),
     url(r'^dashboard/$', DashBoard.as_view(), name='dashboard'),
+    url(r'^profile/$', Profile.as_view(), name='profile'),
     url(r'^administration/', include(administration.urls)),
     url(r'^manager/', include(manager.urls)),
     url(r'^provider/', include(provider.urls)),
