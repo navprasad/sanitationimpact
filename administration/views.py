@@ -6,7 +6,6 @@ from django.db import transaction
 from django.shortcuts import HttpResponseRedirect
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
-from django.forms.models import model_to_dict
 from requests.utils import quote
 from rest_framework import viewsets
 from rest_framework.response import Response
@@ -355,9 +354,10 @@ class AddProvider(View):
         toilets = serializer.validated_data['toilets']
         problems = serializer.validated_data['problems']
         description = serializer.validated_data['description']
+        provider_code = serializer.validated_data['provider_code']
 
         provider = Provider(user_profile=user_profile, provider_id=provider_id, pin_code=pin_code, manager=manager,
-                            description=description)
+                            description=description, provider_code=provider_code)
         provider.save()
         provider.toilets.add(*toilets)
         provider.problems.add(*problems)
@@ -426,6 +426,7 @@ class EditProvider(View):
         default_context['problems'] = request.POST.getlist('problems')
         default_context['address'] = request.POST.get('address')
         default_context['description'] = request.POST.get('description')
+        default_context['provider_code'] = request.POST.get('provider_code')
         default_context['picture'] = request.FILES.get('picture')
 
         serializer = AddProviderSerializer(data=request.POST)
@@ -443,6 +444,7 @@ class EditProvider(View):
         phone_number = serializer.validated_data['phone_number']
         address = serializer.validated_data['address']
         description = serializer.validated_data['description']
+        provider_code = serializer.validated_data['provider_code']
         picture = None
         if request.FILES:
             picture = request.FILES['picture']
@@ -483,6 +485,7 @@ class EditProvider(View):
         provider.toilets.add(*toilets)
         provider.problems.clear()
         provider.problems.add(*problems)
+        provider.provider_code = provider_code
         provider.save()
 
         return HttpResponseRedirect("/administration/view_provider/%s/" % provider.provider_id)

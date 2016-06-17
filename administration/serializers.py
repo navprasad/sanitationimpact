@@ -51,3 +51,4 @@ class AddProviderSerializer(serializers.Serializer):
     toilets = serializers.PrimaryKeyRelatedField(queryset=Toilet.objects.all(), many=True)
     problems = serializers.PrimaryKeyRelatedField(queryset=Problem.objects.all(), many=True)
     description = serializers.CharField(allow_blank=True)
+    provider_code = serializers.CharField(max_length=5)

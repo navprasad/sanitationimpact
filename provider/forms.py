@@ -24,3 +24,7 @@ class ProviderForm(ModelForm):
             'rows': 3,
             'class': 'form-control',
         })
+        self.fields['provider_code'].widget.attrs.update({
+            'class': 'form-control',
+            'required': 'required'
+        })
