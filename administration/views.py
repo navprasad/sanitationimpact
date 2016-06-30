@@ -49,10 +49,9 @@ class ToiletViewSet(viewsets.ModelViewSet):
 
 
 def send_sms(phone_number, message):
-    api_key = "KK48377d55790faf6e93f66223c078ced3"
-    params = "phone_no=" + phone_number + "&api_key=" + api_key + "&message=" + quote(message, safe='')
-    url_root = "http://www.kookoo.in/outbound/outbound_sms.php?"
-    url = url_root + params
+    phone_number = str(phone_number)
+    quote_message = quote(message, safe='')
+    url = "http://smscloud.ozonetel.com/GatewayAPI/rest?send_to=" + phone_number + "&msg=" + quote_message + "&msg_type=text&loginid=sis_foundation&auth_scheme=plain&password=cisokQeUr&v=1.1&format=text&method=sendMessage&mask=TOILEQ"
     urllib2.urlopen(url).read()
 
 
