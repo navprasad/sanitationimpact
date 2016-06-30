@@ -79,7 +79,7 @@ class ReportProblemAPI(APIView):
             ticket.save()
 
         # send sms to the phone_number
-        message = "Your complaint have been registered. Ticket ID: " + str(ticket.id)
+        message = "Thank for reporting a complaint. Ticket ID: " + str(ticket.id)
         send_sms(phone_number, message)
 
         # send sms to the provider
@@ -282,7 +282,7 @@ class ReportProblem(View):
 
             # send sms to the phone_number
             if send_sms_to_reporter:
-                message = "Your complaint have been registered. Ticket ID: " + str(ticket.id)
+                message = "Thank for reporting a complaint. Ticket ID: " + str(ticket.id)
                 send_sms(phone_number, message)
 
             # send sms to the provider
