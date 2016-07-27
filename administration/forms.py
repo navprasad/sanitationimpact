@@ -102,6 +102,11 @@ class TicketForm(ModelForm):
             'rows': 3,
             'class': 'form-control',
         })
+        self.fields['manager_remarks'].widget.attrs.update({
+            'rows': 3,
+            'class': 'form-control',
+        })
+
 
     class Meta:
         model = Ticket

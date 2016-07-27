@@ -232,6 +232,7 @@ class ReportProblem(View):
         status = request.POST.get('status')
         provider_remarks = request.POST.get('provider_remarks')
         user_remarks = request.POST.get('user_remarks')
+        manager_remarks = request.POST.get('manager_remarks')
 
         try:
             toilet = Toilet.objects.get(pk=toilet_pk)
@@ -274,6 +275,7 @@ class ReportProblem(View):
             ticket.status = status
             ticket.provider_remarks = provider_remarks
             ticket.user_remarks = user_remarks
+            ticket.manager_remarks = manager_remarks
             ticket.save()
         else:
             ticket = Ticket(phone_number=phone_number, toilet=toilet, problem=problem, provider=provider,
@@ -288,7 +290,9 @@ class ReportProblem(View):
             # send sms to the provider
             if provider:
                 message = "Complaint registered for Toilet ID: " + str(toilet.toilet_id) + ". Ticket ID: " + str(
-                    ticket.id)
+                    ticket.id) + ". Issue Reported: " + problem.category.description
+                if manager_remarks:
+                    message += ". Manager remarks: " + manager_remarks
                 send_sms(provider.user_profile.phone_number, message)
 
         return HttpResponseRedirect(reverse('dashboard'))
