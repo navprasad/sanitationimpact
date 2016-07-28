@@ -1,6 +1,6 @@
 from django.db import models
 
-from administration.models import Problem, Toilet, UserProfile
+from administration.models import ProblemCategory, Toilet, UserProfile
 from manager.models import Manager
 
 
@@ -23,7 +23,7 @@ class Provider(models.Model):
     pin_code = models.CharField(max_length=10)
     manager = models.ForeignKey(Manager, related_name='providers', on_delete=models.CASCADE)
     toilets = models.ManyToManyField(Toilet, related_name='providers')
-    problems = models.ManyToManyField(Problem, related_name='providers')
+    problems = models.ManyToManyField(ProblemCategory, related_name='providers')
     description = models.TextField(blank=True, default='')
     provider_code = models.CharField(max_length=5, choices=PROVIDER_CODE_CHOICES, default='CLR')
 

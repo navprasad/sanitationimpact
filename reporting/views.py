@@ -54,7 +54,7 @@ class ReportProblemAPI(APIView):
                 Problem.MultipleObjectsReturned):
             return Response({'success': False, 'error': "Invalid Toilet/Problem"})
 
-        providers = Provider.objects.filter(toilets__toilet_id=toilet_id, problems__id=problem.id)
+        providers = Provider.objects.filter(toilets__toilet_id=toilet_id, problems__id=problem.category.id)
         if not providers:
             provider = None
         else:
@@ -249,7 +249,7 @@ class ReportProblem(View):
                                                                               "JavaScript for validation."})
 
         if not provider:
-            providers = Provider.objects.filter(toilets__toilet_id=toilet.toilet_id, problems__id=problem.id)
+            providers = Provider.objects.filter(toilets__toilet_id=toilet.toilet_id, problems__id=problem.category.id)
             if providers:
                 # TODO: Handle this better
                 provider = providers[0]
