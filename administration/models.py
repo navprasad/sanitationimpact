@@ -69,7 +69,7 @@ class Problem(models.Model):
     category = models.ForeignKey(ProblemCategory, related_name='problems')
 
     def __unicode__(self):
-        return str(self.index) + ': ' + self.description + ' (' + self.category.description + ')'
+        return str(self.index) + ': ' + self.description + ' (Type ' + str(self.category.index) + ')'
 
     class Meta:
         unique_together = ("index", "category")

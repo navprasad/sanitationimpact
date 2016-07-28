@@ -1,4 +1,5 @@
 from django.forms import ModelForm, ChoiceField
+from django import forms
 from .models import Admin, Problem, ProblemCategory, Toilet, UserProfile
 from reporting.models import Ticket
 from crispy_forms.helper import FormHelper
@@ -69,6 +70,7 @@ class ToiletForm(ModelForm):
 
 class TicketForm(ModelForm):
     status = ChoiceField(choices=Ticket.STATUS_CHOICES, required=True)
+    problem_category = forms.ModelChoiceField(queryset=ProblemCategory.objects.all())
 
     def __init__(self, *args, **kwargs):
         super(TicketForm, self).__init__(*args, **kwargs)
@@ -106,11 +108,15 @@ class TicketForm(ModelForm):
             'rows': 3,
             'class': 'form-control',
         })
+        self.fields['problem_category'].widget.attrs.update({
+            'class': 'form-control',
+            'required': 'required'
+        })
 
 
     class Meta:
         model = Ticket
-        fields = '__all__'
+        exclude = []
 
 
 class UserForm(ModelForm):

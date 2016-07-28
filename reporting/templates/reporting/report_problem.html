@@ -72,9 +72,18 @@
                                     </div>
                                 </div>
                                 <!-- /Toilet -->
+                                <!-- ProblemType -->
+                                <div class="form-group">
+                                    <label class="control-label col-md-3 col-sm-3 col-xs-12" for="id_problem_category">Problem Type
+                                    </label>
+                                    <div class="col-md-6 col-sm-6 col-xs-12">
+                                        {{ ticket_form.problem_category }}
+                                    </div>
+                                </div>
+                                <!-- /ProblemType -->
                                 <!-- Problem -->
                                 <div class="form-group">
-                                    <label class="control-label col-md-3 col-sm-3 col-xs-12" for="id_toilet">Problem
+                                    <label class="control-label col-md-3 col-sm-3 col-xs-12" for="id_problem">Problem
                                         <span class="required">*</span>
                                     </label>
                                     <div class="col-md-6 col-sm-6 col-xs-12">
@@ -84,7 +93,7 @@
                                 <!-- /Problem -->
                                 <!-- Provider -->
                                 <div class="form-group">
-                                    <label class="control-label col-md-3 col-sm-3 col-xs-12" for="id_toilet">Provider
+                                    <label class="control-label col-md-3 col-sm-3 col-xs-12" for="id_provider">Provider
                                     </label>
                                     <div class="col-md-6 col-sm-6 col-xs-12">
                                         {{ ticket_form.provider }}
@@ -149,4 +158,27 @@
     <!-- validation -->
     <script src="{% static "vendors/parsleyjs/dist/parsley.min.js" %}"></script>
     <!-- /validation -->
+    <script type="text/javascript">
+    $(document).ready(function() {
+        $('#id_problem_category').change(function() {
+            var selected_category = $(this).prop('value');
+            var selected = false;
+            var check_string = 'Type ' + selected_category;
+            if(selected_category == '')
+                check_string = 'Type X';
+            $('#id_problem option').each(function() {
+                $(this)[0].selected = false;
+                if($(this).text().indexOf(check_string) != -1) {
+                    $(this).show();
+                    if(!selected) {
+                        $(this)[0].selected = true;
+                        selected = true;
+                    }
+                } else {
+                    $(this).hide();
+                }
+            });
+        });
+    });
+    </script>
 {% endblock %}
