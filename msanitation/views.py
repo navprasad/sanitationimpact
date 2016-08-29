@@ -15,6 +15,8 @@ from provider.models import Provider
 from reporting.models import Ticket
 
 
+
+
 class Login(View):
     def get(self, request):
         if self.request.user and self.request.user.is_authenticated():
@@ -54,39 +56,50 @@ class DashBoard(View):
         user = UserProfile.objects.get(user=request.user)
         if user.type == 'A':
             tickets = Ticket.objects.all()
-
             total_tickets = len(tickets)
-            unresolved_tickets = len(filter(lambda ticket: ticket.status == Ticket.UNRESOLVED, tickets))
-            resolved_tickets = total_tickets - unresolved_tickets
+
+            unresolved_tickets = len(Ticket.objects.filter(status=0))
+            resolved_tickets = len(Ticket.objects.filter(status=1))
+            cannot_fix_tickets = len(Ticket.objects.filter(status=2))
+            escalated_tickets = len(Ticket.objects.filter(status=3))
 
             return render(request, 'administration/dashboard.html', {'user': user, 'tickets': tickets,
                                                                      'total_tickets': total_tickets,
                                                                      'unresolved_tickets': unresolved_tickets,
-                                                                     'resolved_tickets': resolved_tickets})
+                                                                     'resolved_tickets': resolved_tickets,
+                                                                     'cannot_fix_tickets': cannot_fix_tickets,
+                                                                     'escalated_tickets': escalated_tickets,})
         elif user.type == 'M':
             manager = Manager.objects.get(user_profile=user)
             related_toilets = Toilet.objects.filter(providers__manager=manager)
             tickets = Ticket.objects.filter(toilet__in=related_toilets)
 
             total_tickets = len(tickets)
-            unresolved_tickets = len(filter(lambda ticket: ticket.status == Ticket.UNRESOLVED, tickets))
-            resolved_tickets = total_tickets - unresolved_tickets
+            unresolved_tickets = len(Ticket.objects.filter(toilet__in=related_toilets,status=0))
+            resolved_tickets = len(Ticket.objects.filter(toilet__in=related_toilets,status=1))
+            cannot_fix_tickets = len(Ticket.objects.filter(toilet__in=related_toilets,status=2))
+            escalated_tickets = len(Ticket.objects.filter(toilet__in=related_toilets,status=3))
 
             return render(request, 'manager/dashboard.html', {'user': user, 'manager': manager, 'tickets': tickets,
                                                               'total_tickets': total_tickets,
                                                               'unresolved_tickets': unresolved_tickets,
-                                                              'resolved_tickets': resolved_tickets})
+                                                              'resolved_tickets': resolved_tickets,
+                                                              'cannot_fix_tickets': cannot_fix_tickets,
+                                                              'escalated_tickets': escalated_tickets,})
         elif user.type == 'P':
             tickets = Ticket.objects.filter(provider__user_profile=user)
-
             total_tickets = len(tickets)
-            unresolved_tickets = len(filter(lambda ticket: ticket.status == Ticket.UNRESOLVED, tickets))
-            resolved_tickets = total_tickets - unresolved_tickets
+            unresolved_tickets = len(Ticket.objects.filter(toilet__in=related_toilets,status=0))
+            resolved_tickets = len(Ticket.objects.filter(toilet__in=related_toilets,status=1))
+            cannot_fix_tickets = len(Ticket.objects.filter(toilet__in=related_toilets,status=2))
+            escalated_tickets = len(Ticket.objects.filter(toilet__in=related_toilets,status=3))
 
             return render(request, 'provider/dashboard.html', {'user': user, 'tickets': tickets,
                                                                'total_tickets': total_tickets,
                                                                'unresolved_tickets': unresolved_tickets,
-                                                               'resolved_tickets': resolved_tickets})
+                                                               'resolved_tickets': resolved_tickets,
+                                                               'cannot_fix_tickets': cannot_fix_tickets,
+                                                               'escalated_tickets': escalated_tickets,})
         return HttpResponse("Invalid User")
 
 
@@ -169,3 +182,5 @@ class Profile(View):
                 provider.save()
 
         return HttpResponseRedirect(reverse('dashboard'))
+
+

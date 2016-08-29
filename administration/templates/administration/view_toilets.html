@@ -53,48 +53,29 @@
                                 <div class="col-md-12 col-sm-12 col-xs-12 text-center"></div>
                                 <div class="clearfix"></div>
 
-                                <div class="x_panel">
-                                    <div class="x_title">
-                                        <ul class="nav navbar-right panel_toolbox">
-                                            <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
-                                            </li>
-                                            <li class="dropdown">
-                                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-wrench"></i></a>
-                                                <ul class="dropdown-menu" role="menu">
-                                                    <li><a href="#">Settings 1</a>
-                                                    </li>
-                                                    <li><a href="#">Settings 2</a>
-                                                    </li>
-                                                </ul>
-                                            </li>
-                                            <li><a class="close-link"><i class="fa fa-close"></i></a>
-                                            </li>
-                                        </ul>
-                                        <div class="clearfix"></div>
-                                    </div>
                                     <div class="x_content">
-                                        <table id="datatable" class="table table-striped table-hover">
+                                        <table id="datatable" class="table table-striped table-hover" style="color:#4D4D4D;font-weight:bold;font-size:12px;">
                                             <thead>
-                                            <tr>
-                                                <th>#</th>
-                                                <th>Toilet ID</th>
-                                                <th>Address</th>
-                                                <th>Male/Female</th>
-                                                <th>Paid/Free</th>
-                                                <th>Area</th>
-                                                <th>Type</th>
-                                                <th>Location Code</th>
-                                                <th>Edit</th>
-                                                <th>Delete</th>
+                                            <tr class="text-center" style="vertical-align:middle;">
+                                                <th class="text-center" style="vertical-align:middle;">#</th>
+                                                <th class="text-center" style="vertical-align:middle;">Toilet ID</th>
+                                                <th class="text-center" style="vertical-align:middle;">Address</th>
+                                                <th class="text-center" style="vertical-align:middle;">Male/Female</th>
+                                                <th class="text-center" style="vertical-align:middle;">Paid/Free</th>
+                                                <th class="text-center" style="vertical-align:middle;">Area</th>
+                                                <th class="text-center" style="vertical-align:middle;">Type</th>
+                                                <th class="text-center" style="vertical-align:middle;">Location Code</th>
+                                                <th class="text-center" style="vertical-align:middle;">Edit</th>
+                                                <th class="text-center" style="vertical-align:middle;">Delete</th>
                                             </tr>
                                             </thead>
                                             <tbody>
                                             {% for toilet in toilets %}
                                             <tr>
-                                                <th scope="row">{{ forloop.counter }}</th>
-                                                <td>{{ toilet.toilet_id }}</td>
-                                                <td>{{ toilet.address }}</td>
-                                                <td>
+                                                <th scope="row" class="text-center" style="vertical-align:middle;">{{ forloop.counter }}</th>
+                                                <td class="text-center" style="vertical-align:middle;">{{ toilet.toilet_id }}</td>
+                                                <td class="text-center" style="vertical-align:middle;">{{ toilet.address }}</td>
+                                                <td class="text-center" style="vertical-align:middle;">
                                                     {% if toilet.sex == 'B' %}
                                                     Both
                                                     {% elif toilet.sex == 'M' %}
@@ -103,7 +84,7 @@
                                                     Female
                                                     {% endif %}
                                                 </td>
-                                                <td>
+                                                <td class="text-center" style="vertical-align:middle;">
                                                     {% if toilet.payment == 'P' %}
                                                     Paid
                                                     {% elif toilet.payment == 'F' %}
@@ -114,7 +95,7 @@
                                                     Household Contribution
                                                     {% endif %}
                                                 </td>
-                                                <td>
+                                                <td class="text-center" style="vertical-align:middle;">
                                                     {% if toilet.area == 'R' %}
                                                     Rural
                                                     {% elif toilet.area == 'U' %}
@@ -123,7 +104,7 @@
                                                     Peri Urban
                                                     {% endif %}
                                                 </td>
-                                                <td>
+                                                <td class="text-center" style="vertical-align:middle;">
                                                     {% if toilet.type == 'C' %}
                                                     Community
                                                     {% elif toilet.type == 'P' %}
@@ -132,14 +113,14 @@
                                                     School
                                                     {% endif %}
                                                 </td>
-                                                <td>{{ toilet.location_code }}</td>
+                                                <td class="text-center" style="vertical-align:middle;">{{ toilet.location_code }}</td>
                                                 <td>
                                                     <a class="btn btn-primary btn-xs"
                                                        href="{% url 'edit_toilet' toilet.toilet_id %}">
                                                        Edit
                                                     </a>
                                                 </td>
-                                                <td>
+                                                <td class="text-center" style="vertical-align:middle;">
                                                     <button type="button" class="btn btn-danger btn-xs"
                                                             data-toggle="modal"
                                                             data-target="#myModal{{ toilet.id }}">

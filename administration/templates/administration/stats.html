@@ -1,0 +1,758 @@
+{% extends 'sidebar.html' %}
+
+{% load staticfiles %}
+
+{% block cssLinks %}
+    <link href="{% static "vendors/iCheck/skins/flat/green.css" %}" rel="stylesheet">
+{% endblock %}
+
+{% block pageContent %}
+    <!-- page content -->
+
+    <div class="right_col" role="main">
+        <div class="">
+            <div class="page-title">
+                <div class="title_left">
+                    <h3>{{ user.user.first_name }} {{ user.user.last_name }}</h3>
+                </div>
+            </div>
+            <div class="clearfix"></div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="x_panel">
+                        <div class="x_content">
+                            <div class="col-md-12 col-sm-12 col-xs-12">
+                            <div class="x_panel">
+                              <div class="x_title">
+                                <h2>Toilet Complaints {{status}} {{title}}</h2>
+                                
+                                <div class="clearfix"></div>
+                              </div>
+                              <div class="x_content">
+
+                            <div class="col-md-12 col-sm-12 col-xs-12 "" id="echart_donut" style="height:400px;"></div>
+
+                </div>
+              </div>
+                            </div>
+                            <div class="col-md-4 col-sm-3 col-xs-12 col-md-offset-4">
+
+                                <section class="panel">
+
+                                    <div class="x_title">
+                                        <h2 style="padding-bottom: 7px; padding-top: 4px; width: 100%;"
+                                            class="text-center">Select Categories</h2>
+                                        <div class="clearfix"></div>
+                                    </div>
+                                    <div class="panel-body">   
+                                        <form method="post" action="">{%csrf_token%}
+                                          <div class="form-group text-center">
+                                          <div>
+                                            <fieldset>
+                                              <div class="control-group">
+                                                <div class="controls">
+                                                  <div class=" xdisplay_inputx form-group has-feedback">
+                                                    <input type="text" class="form-control text-center" id="start_cal" placeholder=" Start Date" name="startDate" aria-describedby="inputSuccess2Status3"
+                                                    style="font-weight:bold">
+                                                    <span class="fa fa-calendar-o form-control-feedback right" aria-hidden="true"></span>
+                                                    <span id="inputSuccess2Status3" class="sr-only">(success)</span>
+                                                  </div>
+                                                </div>
+                                              </div>
+                                            </fieldset>
+                                            </div>
+                                            <div>
+                                            <fieldset>
+                                              <div class="control-group">
+                                                <div class="controls">
+                                                  <div class=" xdisplay_inputx form-group has-feedback">
+                                                    <input type="text" class="form-control text-center" id="end_cal" placeholder=" End Date" name="endDate" aria-describedby="inputSuccess2Status3"
+                                                    style="font-weight:bold">
+                                                    <span class="fa fa-calendar-o form-control-feedback right" aria-hidden="true"></span>
+                                                    <span id="inputSuccess2Status3" class="sr-only">(success)</span>
+                                                  </div>
+                                                </div>
+                                              </div>
+                                            </fieldset>
+                                            </div>
+                                          </div>
+                                          <div class="form-group">
+                                            <div>
+                                              <select class="form-control text-center" name='problem_category' id='problem_category' onChange="addOptions()" style="font-weight:bold;text-align-last:center;">
+                                                <option>All Categories</option>
+                                                {% for pc in problem_category%}
+                                                  {%if pc.description != 'others'%}
+                                                    <option value={{pc.id}}>{{pc.description}}</option>
+                                                  {%endif%}
+                                                {%endfor%}
+                                              </select>
+                                            </div>
+                                            </div>
+                                            <div class="form-group">
+                                              <div>
+                                                <select class="form-control text-center" name='status_category' id='status_category' style="font-weight:bold;text-align-last:center;">
+                                                  <option>All</option>
+                                                  <option value='0'>Unresolved</option>
+                                                  <option value='1'>Resolved</option>
+                                                  <option value='3'>Escalated</option>
+                                                  <option value='2'>Cannot Fix</option>
+                                                </select>
+                                              </div>
+                                            </div>
+                                          <div class="form-group">
+                                            <div>
+                                              <select class="form-control text-center" name='filter_category' id='filter_category'  onChange="addOptions()" style="font-weight:bold;text-align-last:center;">
+                                                <option>All</option>
+                                                <option>Filter By Provider</option>
+                                                <option>Filter By Manager</option>
+                                                <option>Filter By Toilet ID</option>
+                                                <option>Filter By Toilet Location Code</option>
+                                                <option>Filter By Toilet Area</option>
+                                                <option>Filter By Toilet Type</option>
+                                                <option>Filter By Toilet Gender</option>
+                                                <option>Filter By Toilet Payment</option>
+                                              </select>
+                                            </div>
+                                          </div>
+                                          <div class="form-group">
+                                            <div id='sub_category'>
+                                            </div>
+                                          </div>
+                                          <!-- <div class="form-group">
+                                            <div id='sub_sub_category'>
+                                            </div>
+                                          </div> -->
+                                          
+                                          <div class="form-group col-md-12 text-center" >
+                                            <input type="submit" value="Generate" class="btn btn-lg btn-primary">
+                                          </div>
+                                        </form>
+                                    </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- /page content -->
+    
+{% endblock %}
+
+{% block jsLinks %}
+    <!-- FastClick -->
+    <script src="{% static "vendors/fastclick/lib/fastclick.js" %}"></script>
+    <!-- NProgress -->
+    <script src="{% static "vendors/nprogress/nprogress.js" %}"></script>
+    <script src="{% static "vendors/echarts/map/js/world.js" %}"></script>
+    <script src="{% static "vendors/echarts/dist/echarts.min.js" %}"></script>
+    <script src="{% static "vendors/echarts/dist/echarts.min.js" %}"></script>
+    <script src="{%static "js/moment/moment.min.js"%}></script>
+    <script src="{%static "js/datepicker/daterangepicker.js"%}></script>
+
+    <script>
+      function addOptions(){
+      var myselect = document.getElementById("filter_category");
+      var filter_option = myselect.options[myselect.selectedIndex].value;
+      if (filter_option == 'All')
+      {
+        var myDiv = document.getElementById("sub_category");
+
+        //Create array of options to be added
+        myDiv.innerHTML = '';
+        // var myDiv = document.getElementById("sub_sub_category");
+        // myDiv.innerHTML = '';
+      }
+      if (filter_option == 'Filter By Provider')
+      {
+        var myDiv = document.getElementById("sub_category");
+        myDiv.innerHTML = '';
+        var myselect = document.getElementById("filter_category");
+        var filter_option = myselect.options[myselect.selectedIndex].value;
+        var names = [{%for provider in providers%}"{{provider.user_profile.user.first_name}} {{provider.user_profile.user.last_name}}",{%endfor%}];
+        var id = [{%for provider in providers%}"{{provider.id}}",{%endfor%}];
+          //Create and append select list
+          var myDiv = document.getElementById("sub_category");
+          var selectList = document.createElement("select");
+          selectList.id = "providerSelect";
+          selectList.name = "providerSelect";
+          selectList.className += "form-control";
+          selectList.style = "font-weight:bold;text-align-last:center;";
+          myDiv.appendChild(selectList);
+
+          //Create and append the options
+          for (var i = 0; i < names.length; i++) {
+              var option = document.createElement("option");
+              option.value = id[i];
+              option.text = names[i];
+              selectList.appendChild(option);
+          }
+        
+
+        //Create array of options to be added
+        
+      }
+      if (filter_option == 'Filter By Manager')
+      {
+        var myDiv = document.getElementById("sub_category");
+        myDiv.innerHTML = '';
+        var myselect = document.getElementById("filter_category");
+        var filter_option = myselect.options[myselect.selectedIndex].value;
+        var names = [{%for manager in managers%}"{{manager.user_profile.user.first_name}} {{manager.user_profile.user.last_name}}",{%endfor%}];
+        var id = [{%for manager in managers%}"{{manager.id}}",{%endfor%}];
+          //Create and append select list
+          var myDiv = document.getElementById("sub_category");
+          var selectList = document.createElement("select");
+          selectList.id = "managerSelect";
+          selectList.name = "managerSelect";
+          selectList.className += "form-control";
+          selectList.style = "font-weight:bold;text-align-last:center;";
+          myDiv.appendChild(selectList);
+
+          //Create and append the options
+          for (var i = 0; i < names.length; i++) {
+              var option = document.createElement("option");
+              option.value = id[i];
+              option.text = names[i];
+              selectList.appendChild(option);
+          }
+        
+
+        //Create array of options to be added
+        
+      }
+
+      if (filter_option == 'Filter By Toilet ID')
+      {
+        var myDiv = document.getElementById("sub_category");
+        myDiv.innerHTML = '';
+        var myselect = document.getElementById("filter_category");
+        var filter_option = myselect.options[myselect.selectedIndex].value;
+        var names = [{%for toilet in toilets%}"{{toilet.toilet_id}}",{%endfor%}];
+        var id = [{%for toilet in toilets%}"{{toilet.id}}",{%endfor%}];
+          //Create and append select list
+          var myDiv = document.getElementById("sub_category");
+          var selectList = document.createElement("select");
+          selectList.id = "toiletSelect";
+          selectList.name = "toiletSelect";
+          selectList.className += "form-control";
+          selectList.style = "font-weight:bold;text-align-last:center;";
+          myDiv.appendChild(selectList);
+
+          //Create and append the options
+          for (var i = 0; i < names.length; i++) {
+              var option = document.createElement("option");
+              option.value = id[i];
+              option.text = names[i];
+              selectList.appendChild(option);
+          }
+        
+
+        //Create array of options to be added
+        
+      }
+
+      if (filter_option == 'Filter By Toilet Location Code')
+      {
+        var myDiv = document.getElementById("sub_category");
+        myDiv.innerHTML = '';
+        var myselect = document.getElementById("filter_category");
+        var filter_option = myselect.options[myselect.selectedIndex].value;
+        var names = [{%for location_code in toilet_locations%}"{{location_code}}",{%endfor%}];
+        var id = [{%for location_code in toilet_locations%}"{{location_code}}",{%endfor%}];
+          //Create and append select list
+          var myDiv = document.getElementById("sub_category");
+          var selectList = document.createElement("select");
+          selectList.id = "toiletLocationSelect";
+          selectList.name = "toiletLocationSelect";
+          selectList.className += "form-control";
+          selectList.style = "font-weight:bold;text-align-last:center;";
+          myDiv.appendChild(selectList);
+
+          //Create and append the options
+          for (var i = 0; i < names.length; i++) {
+              var option = document.createElement("option");
+              option.value = id[i];
+              option.text = names[i];
+              selectList.appendChild(option);
+          }
+        
+
+        //Create array of options to be added
+        
+      }
+
+      if (filter_option == 'Filter By Toilet Area')
+      {
+        var myDiv = document.getElementById("sub_category");
+        myDiv.innerHTML = '';
+        var myselect = document.getElementById("filter_category");
+        var filter_option = myselect.options[myselect.selectedIndex].value;
+        var names = [{%for area in toilet_areas%}"{{area.1}}",{%endfor%}];
+        var id = [{%for area in toilet_areas%}"{{area.0}}",{%endfor%}];
+          //Create and append select list
+          var myDiv = document.getElementById("sub_category");
+          var selectList = document.createElement("select");
+          selectList.id = "toiletAreaSelect";
+          selectList.name = "toiletAreaSelect";
+          selectList.className += "form-control";
+          selectList.style = "font-weight:bold;text-align-last:center;";
+          myDiv.appendChild(selectList);
+
+          //Create and append the options
+          for (var i = 0; i < names.length; i++) {
+              var option = document.createElement("option");
+              option.value = id[i];
+              option.text = names[i];
+              selectList.appendChild(option);
+          }
+        
+
+        //Create array of options to be added
+        
+      }
+      if (filter_option == 'Filter By Toilet Type')
+      {
+        var myDiv = document.getElementById("sub_category");
+        myDiv.innerHTML = '';
+        var myselect = document.getElementById("filter_category");
+        var filter_option = myselect.options[myselect.selectedIndex].value;
+        var names = [{%for type in toilet_types%}"{{type.1}}",{%endfor%}];
+        var id = [{%for type in toilet_types%}"{{type.0}}",{%endfor%}];
+          //Create and append select list
+          var myDiv = document.getElementById("sub_category");
+          var selectList = document.createElement("select");
+          selectList.id = "toiletTypeSelect";
+          selectList.name = "toiletTypeSelect";
+          selectList.className += "form-control";
+          selectList.style = "font-weight:bold;text-align-last:center;";
+          myDiv.appendChild(selectList);
+
+          //Create and append the options
+          for (var i = 0; i < names.length; i++) {
+              var option = document.createElement("option");
+              option.value = id[i];
+              option.text = names[i];
+              selectList.appendChild(option);
+          }
+        
+
+        //Create array of options to be added
+        
+      }
+
+      if (filter_option == 'Filter By Toilet Gender')
+      {
+        var myDiv = document.getElementById("sub_category");
+        myDiv.innerHTML = '';
+        var myselect = document.getElementById("filter_category");
+        var filter_option = myselect.options[myselect.selectedIndex].value;
+        var names = [{%for gender in toilet_gender%}"{{gender.1}}",{%endfor%}];
+        var id = [{%for gender in toilet_gender%}"{{gender.0}}",{%endfor%}];
+          //Create and append select list
+          var myDiv = document.getElementById("sub_category");
+          var selectList = document.createElement("select");
+          selectList.id = "toiletGenderSelect";
+          selectList.name = "toiletGenderSelect";
+          selectList.className += "form-control";
+          selectList.style = "font-weight:bold;text-align-last:center;";
+          myDiv.appendChild(selectList);
+
+          //Create and append the options
+          for (var i = 0; i < names.length; i++) {
+              var option = document.createElement("option");
+              option.value = id[i];
+              option.text = names[i];
+              selectList.appendChild(option);
+          }
+        
+
+        //Create array of options to be added
+        
+      }
+
+      if (filter_option == 'Filter By Toilet Payment')
+      {
+        var myDiv = document.getElementById("sub_category");
+        myDiv.innerHTML = '';
+        var myselect = document.getElementById("filter_category");
+        var filter_option = myselect.options[myselect.selectedIndex].value;
+        var names = [{%for payment in toilet_payments%}"{{payment.1}}",{%endfor%}];
+        var id = [{%for payment in toilet_payments%}"{{payment.0}}",{%endfor%}];
+          //Create and append select list
+          var myDiv = document.getElementById("sub_category");
+          var selectList = document.createElement("select");
+          selectList.id = "toiletPaymentSelect";
+          selectList.name = "toiletPaymentSelect";
+          selectList.className += "form-control";
+          selectList.style = "font-weight:bold;text-align-last:center;";
+          myDiv.appendChild(selectList);
+
+          //Create and append the options
+          for (var i = 0; i < names.length; i++) {
+              var option = document.createElement("option");
+              option.value = id[i];
+              option.text = names[i];
+              selectList.appendChild(option);
+          }
+        
+
+        //Create array of options to be added
+        
+      }
+    }
+
+      // function addProviders()
+      // {
+      //   var myselect = document.getElementById("filter_provider_category");
+      //   var filter_option = myselect.options[myselect.selectedIndex].value;
+      //   if(filter_option=="Filter By Name"){
+      //     var names = [{%for provider in providers%}"{{provider.user_profile.user.first_name}} {{provider.user_profile.user.last_name}}",{%endfor%}];
+      //     var id = [{%for provider in providers%}"{{provider.id}}",{%endfor%}];
+
+      //     //Create and append select list
+      //     var myDiv = document.getElementById("sub_sub_category");
+      //     myDiv.innerHTML = '';
+      //     var selectList = document.createElement("select");
+      //     selectList.id = "providerSelect";
+      //     selectList.name = "providerSelect";
+      //     selectList.className += "form-control";
+      //     selectList.style = "font-weight:bold;text-align-last:center;";
+      //     myDiv.appendChild(selectList);
+
+      //     //Create and append the options
+      //     for (var i = 0; i < names.length; i++) {
+      //         var option = document.createElement("option");
+      //         option.value = id[i];
+      //         option.text = names[i];
+      //         selectList.appendChild(option);
+      //     }
+      //   }
+        
+      // }
+    </script>
+
+    <script>
+      var theme = {
+          color: [
+              '#26B99A', '#34495E', '#BBC400', '#3498DB',
+              '#9B59B6', '#8abb6f', '#FF0000', '#bfd3b7'
+          ],
+
+          title: {
+              itemGap: 8,
+              textStyle: {
+                  fontWeight: 'bold',
+                  color: '#408829'
+              }
+          },
+
+          dataRange: {
+              color: ['#1f610a', '#97b58d']
+          },
+
+          toolbox: {
+              color: ['#408829', '#408829', '#408829', '#408829']
+          },
+
+          tooltip: {
+              backgroundColor: 'rgba(0,0,0,0.5)',
+              axisPointer: {
+                  type: 'line',
+                  lineStyle: {
+                      color: '#408829',
+                      type: 'dashed'
+                  },
+                  crossStyle: {
+                      color: '#408829'
+                  },
+                  shadowStyle: {
+                      color: 'rgba(200,200,200,0.3)'
+                  }
+              }
+          },
+
+          dataZoom: {
+              dataBackgroundColor: '#eee',
+              fillerColor: 'rgba(64,136,41,0.2)',
+              handleColor: '#408829'
+          },
+          grid: {
+              borderWidth: 0
+          },
+
+          categoryAxis: {
+              axisLine: {
+                  lineStyle: {
+                      color: '#408829'
+                  }
+              },
+              splitLine: {
+                  lineStyle: {
+                      color: ['#eee']
+                  }
+              }
+          },
+
+          valueAxis: {
+              axisLine: {
+                  lineStyle: {
+                      color: '#408829'
+                  }
+              },
+              splitArea: {
+                  show: true,
+                  areaStyle: {
+                      color: ['rgba(250,250,250,0.1)', 'rgba(200,200,200,0.1)']
+                  }
+              },
+              splitLine: {
+                  lineStyle: {
+                      color: ['#eee']
+                  }
+              }
+          },
+          timeline: {
+              lineStyle: {
+                  color: '#408829'
+              },
+              controlStyle: {
+                  normal: {color: '#408829'},
+                  emphasis: {color: '#408829'}
+              }
+          },
+
+          k: {
+              itemStyle: {
+                  normal: {
+                      color: '#68a54a',
+                      color0: '#a9cba2',
+                      lineStyle: {
+                          width: 1,
+                          color: '#408829',
+                          color0: '#86b379'
+                      }
+                  }
+              }
+          },
+          map: {
+              itemStyle: {
+                  normal: {
+                      areaStyle: {
+                          color: '#ddd'
+                      },
+                      label: {
+                          textStyle: {
+                              color: '#c12e34'
+                          }
+                      }
+                  },
+                  emphasis: {
+                      areaStyle: {
+                          color: '#99d2dd'
+                      },
+                      label: {
+                          textStyle: {
+                              color: '#c12e34'
+                          }
+                      }
+                  }
+              }
+          },
+          force: {
+              itemStyle: {
+                  normal: {
+                      linkStyle: {
+                          strokeColor: '#408829'
+                      }
+                  }
+              }
+          },
+          chord: {
+              padding: 4,
+              itemStyle: {
+                  normal: {
+                      lineStyle: {
+                          width: 1,
+                          color: 'rgba(128, 128, 128, 0.5)'
+                      },
+                      chordStyle: {
+                          lineStyle: {
+                              width: 1,
+                              color: 'rgba(128, 128, 128, 0.5)'
+                          }
+                      }
+                  },
+                  emphasis: {
+                      lineStyle: {
+                          width: 1,
+                          color: 'rgba(128, 128, 128, 0.5)'
+                      },
+                      chordStyle: {
+                          lineStyle: {
+                              width: 1,
+                              color: 'rgba(128, 128, 128, 0.5)'
+                          }
+                      }
+                  }
+              }
+          },
+          gauge: {
+              startAngle: 225,
+              endAngle: -45,
+              axisLine: {
+                  show: true,
+                  lineStyle: {
+                      color: [[0.2, '#86b379'], [0.8, '#68a54a'], [1, '#408829']],
+                      width: 8
+                  }
+              },
+              axisTick: {
+                  splitNumber: 10,
+                  length: 12,
+                  lineStyle: {
+                      color: 'auto'
+                  }
+              },
+              axisLabel: {
+                  textStyle: {
+                      color: 'auto'
+                  }
+              },
+              splitLine: {
+                  length: 18,
+                  lineStyle: {
+                      color: 'auto'
+                  }
+              },
+              pointer: {
+                  length: '90%',
+                  color: 'auto'
+              },
+              title: {
+                  textStyle: {
+                      color: '#333'
+                  }
+              },
+              detail: {
+                  textStyle: {
+                      color: 'auto'
+                  }
+              }
+          },
+          textStyle: {
+              fontFamily: 'Arial, Verdana, sans-serif',
+              fontSize: '13',
+              fontWeight : 'bold'
+          }
+      };
+
+
+      var echartDonut = echarts.init(document.getElementById('echart_donut'), theme);
+      
+      echartDonut.setOption({
+        tooltip: {
+          trigger: 'item',
+          formatter: "{a} <br/>{b} : {c} ({d}%)"
+        },
+        calculable: true,
+        legend: {
+          x: 'center',
+          y: 'bottom',
+          show:false,
+          data: [
+            {%for stat in stats%}
+            {%if stat.0 != 'others'%}
+            '{{stat.0}}',
+            {%endif%}
+            {%endfor%}
+          ]
+        },
+        toolbox: {
+          show: true,
+          feature: {
+            magicType: {
+              show: true,
+              type: ['pie', 'funnel'],
+              option: {
+                funnel: {
+                  x: '25%',
+                  width: '50%',
+                  funnelAlign: 'center',
+                  max: 1548
+                }
+              }
+            },
+            restore: {
+              show: false,
+              title: "Restore"
+            },
+            saveAsImage: {
+              show: true,
+              title: "Save Image"
+            }
+          }
+        },
+        series: [{
+          name: '',
+          type: 'pie',
+          radius: ['0%', '65%'],
+          itemStyle: {
+            normal: {
+              label: {
+                show: true
+              },
+              labelLine: {
+                show: true
+              }
+            },
+            emphasis: {
+              label: {
+                show: true,
+                position: 'center',
+                textStyle: {
+                  fontSize: '14',
+                  fontWeight: 'bold'
+                }
+              }
+            }
+          },
+          data: [
+          {%for stat,percentage in stats%}
+          {
+            value: {{stat.1}},
+            name: '{{stat.0}} : {{stat.1}} ( {{percentage}}% )'
+          },
+          {%endfor%} ]
+        }]
+      });
+    </script>
+
+
+<!-- Date Picker -->
+<script>
+      $(document).ready(function() {
+        
+        $('#start_cal').daterangepicker({
+          singleDatePicker: true,
+          calender_style: "picker_3",
+        }, function(start, end, label) {
+          // console.log(start.toISOString(), end.toISOString(), label);
+        });
+        
+      });
+</script>
+
+<script>
+      $(document).ready(function() {
+        
+        $('#end_cal').daterangepicker({
+          singleDatePicker: true,
+          calender_style: "picker_3",
+        }, function(start, end, label) {
+          // console.log(start.toISOString(), end.toISOString(), label);
+        });
+        
+      });
+</script>
+{% endblock %}
+
+

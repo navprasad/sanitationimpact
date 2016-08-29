@@ -1,6 +1,7 @@
 import os
 import urllib2
-
+import json
+from django.utils import timezone
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.views.generic import View
@@ -37,57 +38,127 @@ class IsValidToilet(APIView):
 
 
 class ReportProblemAPI(APIView):
-    def post(self, request):
-        serializer = ReportProblemSerializer(data=request.data)
-        if not serializer.is_valid():
-            return Response({'success': False, 'error': serializer.errors})
-        phone_number = serializer.validated_data['phone_number']
-        toilet_id = serializer.validated_data['toilet_id']
-        category_index = serializer.validated_data['category_index']
-        problem_index = serializer.validated_data['problem_index']
-        audio_file_url = serializer.validated_data.get('audio_file_url')
+	def post(self, request):
+		serializer = ReportProblemSerializer(data=request.data)
+		if not serializer.is_valid():
+			return Response({'success': False, 'error': serializer.errors})
+		phone_number = serializer.validated_data['phone_number']
+		toilet_id = serializer.validated_data['toilet_id']
+		category_index = serializer.validated_data['category_index']
+		problem_index = serializer.validated_data['problem_index']
+		audio_file_url = serializer.validated_data.get('audio_file_url')
 
-        try:
-            toilet = Toilet.objects.get(toilet_id=toilet_id)
-            problem = Problem.objects.get(index=problem_index, category__index=category_index)
-        except (Toilet.DoesNotExist, Toilet.MultipleObjectsReturned, Problem.DoesNotExist,
-                Problem.MultipleObjectsReturned):
-            return Response({'success': False, 'error': "Invalid Toilet/Problem"})
+		try:
+			toilet = Toilet.objects.get(toilet_id=toilet_id)
+			problem = Problem.objects.get(index=problem_index, category__index=category_index)
+		except (Toilet.DoesNotExist, Toilet.MultipleObjectsReturned, Problem.DoesNotExist, Problem.MultipleObjectsReturned):
+			return Response({'success': False, 'error': "Invalid Toilet/Problem"})
+		tickets = []
+		if not (problem_index=='1' and category_index=='5'):	
+			tickets = Ticket.objects.filter(toilet=toilet,problem=problem).exclude(status=1)
 
-        providers = Provider.objects.filter(toilets__toilet_id=toilet_id, problems__id=problem.category.id)
-        if not providers:
-            provider = None
-        else:
-            # TODO: Handle this better
-            provider = providers[0]
+		if not tickets:
+	 		providers = Provider.objects.filter(toilets__toilet_id=toilet_id, problems__id=problem.category.id)
+			if not providers:
+				provider = None
+			else:
+				# TODO: Handle this better
+				provider = providers[0]
 
-        # TODO: handle update ticket
-        ticket = Ticket(phone_number=phone_number, toilet=toilet, problem=problem, provider=provider)
-        ticket.save()
+	        # TODO: handle update ticket
+			info_list = []
+			info_list.append(phone_number)
+			day = str(timezone.localtime(timezone.now()).date().day) if timezone.localtime(timezone.now()).date().day > 9 else '0'+str(timezone.localtime(timezone.now()).date().day)
+			month = str(timezone.localtime(timezone.now()).date().month) if timezone.localtime(timezone.now()).date().month > 9 else '0'+str(timezone.localtime(timezone.now()).date().month) if timezone.localtime(timezone.now()).date().month > 9 else '0'+str(timezone.localtime(timezone.now()).date().month)
+			year = str(timezone.localtime(timezone.now()).date().year)
+			hours = str(timezone.localtime(timezone.now()).time().hour)
+			minutes = str(timezone.localtime(timezone.now()).time().minute)
+			time = ""
+			if int(hours)>12:
+				hours = str(int(hours)-12)
+				if len(hours)==1:
+					hours = '0'+hours
+				if len(minutes)==1:
+					minutes = '0'+minutes
+				time = hours+":"+minutes+" PM"
+			else:
+				if len(hours)==1:
+					hours = '0'+hours
+				if len(minutes)==1:
+					minutes = '0'+minutes
+				time = hours+":"+minutes+" AM"
+			info_list.append(day+"."+month+"."+year+" , "+time)
+			comp_list = []
+			comp_list.append(info_list)
+			ticket = Ticket(phone_number=phone_number, toilet=toilet, problem=problem, provider=provider,additional_complaints_info=json.dumps(comp_list))
+			ticket.save()
 
-        if problem.category.is_audio_recording:
-            if not audio_file_url:
-                return Response({'success': False, 'error': "Invalid POST data"})
-            file_name = os.path.basename('ticket_' + str(ticket.id) + '_audio.mp3')
-            full_file_path = os.path.join(settings.MEDIA_ROOT, "ticket_audio_files", file_name)
+			if problem.category.is_audio_recording:
+				if not audio_file_url:
+					return Response({'success': False, 'error': "Invalid POST data"})
+				file_name = os.path.basename('ticket_' + str(ticket.id) + '_audio.mp3')
+				full_file_path = os.path.join(settings.MEDIA_ROOT, "ticket_audio_files", file_name)
 
-            download_response = download_audio(audio_file_url, full_file_path)
-            if not download_response['success']:
-                ticket.delete()
-                return Response(download_response)
-            ticket.is_audio_present = True
-            ticket.save()
+				download_response = download_audio(audio_file_url, full_file_path)
+				if not download_response['success']:
+					ticket.delete()
+					return Response(download_response)
+				ticket.is_audio_present = True
+				ticket.save()
 
-        # send sms to the phone_number
-        message = "Thank for reporting a complaint. Ticket ID: " + str(ticket.id)
-        send_sms(phone_number, message)
+	        # send sms to the phone_number
+			message = "Thank you for calling Mobile Sanitation to report the complaint. Your complaint has been registered with Ticket ID: " + str(ticket.id)
+			send_sms(phone_number, message)
 
-        # send sms to the provider
-        if provider:
-            message = "Complaint registered for Toilet ID: " + str(toilet_id) + ". Ticket ID: " + str(ticket.id)
-            send_sms(provider.user_profile.phone_number, message)
+	        # send sms to the provider
+			if provider:
+				prob_desc = ticket.problem.description if ticket.problem.description!='others' else ticket.problem.category.description
+				message = "A complaint of "+str(prob_desc)+" has been registered for Toilet ID: " + str(toilet_id) + ", Ticket ID: " + str(ticket.id)
+				send_sms(provider.user_profile.phone_number, message)
 
-        return Response({'success': True, 'ticket_id': ticket.id})
+			return Response({'success': True, 'ticket_id': ticket.id})
+		else:
+			ticket = tickets[0]
+			ticket.complaints+=1
+			info_list = []
+			info_list.append(phone_number)
+			day = str(timezone.localtime(timezone.now()).date().day) if timezone.localtime(timezone.now()).date().day > 9 else '0'+str(timezone.localtime(timezone.now()).date().day)
+			month = str(timezone.localtime(timezone.now()).date().month) if timezone.localtime(timezone.now()).date().month > 9 else '0'+str(timezone.localtime(timezone.now()).date().month)
+			year = str(timezone.localtime(timezone.now()).date().year)
+			hours = str(timezone.localtime(timezone.now()).time().hour)
+			minutes = str(timezone.localtime(timezone.now()).time().minute)
+			time = ""
+			if int(hours)>12:
+				hours = str(int(hours)-12)
+				if len(hours)==1:
+					hours = '0'+hours
+				if len(minutes)==1:
+					minutes = '0'+minutes
+				time = hours+":"+minutes+" PM"
+			else:
+				if len(hours)==1:
+					hours = '0'+hours
+				if len(minutes)==1:
+					minutes = '0'+minutes
+			info_list.append(day+"."+month+"."+year+" , "+time)
+			jsonDec = json.decoder.JSONDecoder()
+			complaint_list = jsonDec.decode(ticket.additional_complaints_info)
+			complaint_list.append(info_list)
+			ticket.additional_complaints_info = json.dumps(complaint_list)
+			ticket.save()
+
+			# send sms to the phone_number
+			message = "Thank you for calling Mobile Sanitation to report the complaint. Your complaint has been registered with Ticket ID: " + str(ticket.id)
+			send_sms(phone_number, message)
+
+			# send sms to the provider
+			if provider:
+				prob_desc = ticket.problem.description if ticket.problem.description!='others' else ticket.problem.category.description
+				message = "Another complaint of "+str(prob_desc)+" has been registered for Toilet ID: " + str(toilet_id) + ", Ticket ID: " + str(ticket.id)
+				send_sms(provider.user_profile.phone_number, message)
+			return Response({'success': True, 'ticket_id': ticket.id})
+
+
 
 
 class IsValidProviderTicket(APIView):
@@ -278,21 +349,95 @@ class ReportProblem(View):
             ticket.manager_remarks = manager_remarks
             ticket.save()
         else:
-            ticket = Ticket(phone_number=phone_number, toilet=toilet, problem=problem, provider=provider,
-                            provider_remarks=provider_remarks, user_remarks=user_remarks)
-            ticket.save()
+            tickets = Ticket.objects.filter(toilet=toilet,problem=problem).exclude(status=1)
+            if not tickets:
+                info_list = []
+                info_list.append(phone_number)
+                day = str(timezone.localtime(timezone.now()).date().day) if timezone.localtime(timezone.now()).date().day > 9 else '0'+str(timezone.localtime(timezone.now()).date().day)
+                month = str(timezone.localtime(timezone.now()).date().month) if timezone.localtime(timezone.now()).date().month > 9 else '0'+str(timezone.localtime(timezone.now()).date().month)
+                year = str(timezone.localtime(timezone.now()).date().year)
+                hours = str(timezone.localtime(timezone.now()).time().hour)
+                minutes = str(timezone.localtime(timezone.now()).time().minute)
+                time = ""
+                if int(hours)>12:
+                    hours = str(int(hours)-12)
+                    if len(hours)==1:
+                        hours = '0'+hours
+                    if len(minutes)==1:
+                        minutes = '0'+minutes
+                    time = hours+":"+minutes+" PM"
+                else:
+                    if len(hours)==1:
+                        hours = '0'+hours
+                    if len(minutes)==1:
+                        minutes = '0'+minutes
+                    time = hours+":"+minutes+" AM"
+                info_list.append(day+"."+month+"."+year+" , "+time)
+                comp_list = []
+                comp_list.append(info_list)
+                ticket = Ticket(phone_number=phone_number, toilet=toilet, problem=problem, provider=provider,provider_remarks=provider_remarks, user_remarks=user_remarks,additional_complaints_info=json.dumps(comp_list))
+                ticket.save()
 
-            # send sms to the phone_number
-            if send_sms_to_reporter:
-                message = "Thank for reporting a complaint. Ticket ID: " + str(ticket.id)
-                send_sms(phone_number, message)
+                # send sms to the phone_number
+                if send_sms_to_reporter:
+                    message = "Thank you for calling Mobile Sanitation to report the complaint. Your complaint has been registered with Ticket ID: " + str(ticket.id)
+                    send_sms(phone_number, message)
 
             # send sms to the provider
-            if provider:
-                message = "Complaint registered for Toilet ID: " + str(toilet.toilet_id) + ". Ticket ID: " + str(
-                    ticket.id) + ". Issue Reported: " + problem.category.description
-                if manager_remarks:
-                    message += ". Manager remarks: " + manager_remarks
-                send_sms(provider.user_profile.phone_number, message)
+                if provider:
+                    prob_desc = ticket.problem.description if ticket.problem.description!='others' else ticket.problem.category.description
+                    message = "A Complaint of "+str(prob_desc)+" has registered for Toilet ID: " + str(toilet.toilet_id) + ", Ticket ID: " + str(
+                        ticket.id) + ", Issue Reported: " + problem.category.description
+                    if manager_remarks:
+                        message += ", Manager remarks: " + manager_remarks
+                    send_sms(provider.user_profile.phone_number, message)
+            else:
+            	ticket = tickets[0]
+                ticket.complaints+=1
+                info_list = []
+                info_list.append(phone_number)
+                day = str(timezone.localtime(timezone.now()).date().day) if timezone.localtime(timezone.now()).date().day > 9 else '0'+str(timezone.localtime(timezone.now()).date().day)
+                month = str(timezone.localtime(timezone.now()).date().month) if timezone.localtime(timezone.now()).date().month > 9 else '0'+str(timezone.localtime(timezone.now()).date().month)
+                year = str(timezone.localtime(timezone.now()).date().year)
+                hours = str(timezone.localtime(timezone.now()).time().hour)
+                minutes = str(timezone.localtime(timezone.now()).time().minute)
+                time = ""
+                
+                if int(hours)>12:
+                    hours = str(int(hours)-12)
+                    if len(hours)==1:
+                        hours = '0'+hours
+                    if len(minutes)==1:
+                        minutes = '0'+minutes
+                    time = hours+":"+minutes+" PM"
+                else:
+                    if len(hours)==1:
+                        hours = '0'+hours
+                    if len(minutes)==1:
+                        minutes = '0'+minutes
+                    time = hours+":"+minutes+" AM"
+                info_list.append(day+"."+month+"."+year+" , "+time)
+                jsonDec = json.decoder.JSONDecoder()
+                complaint_list = jsonDec.decode(ticket.additional_complaints_info)
+                complaint_list.append(info_list)
+                ticket.additional_complaints_info = json.dumps(complaint_list)
+                ticket.provider_remarks += '\n'+provider_remarks
+                ticket.user_remarks += '\n'+user_remarks
+                ticket.manager_remarks += '\n'+manager_remarks
+                ticket.save()
+
+                # send sms to the phone_number
+                if send_sms_to_reporter:
+                    message = "Thank you for calling Mobile Sanitation to report the complaint. Your complaint has been registered with Ticket ID: " + str(ticket.id)
+                    send_sms(phone_number, message)
+
+            # send sms to the provider
+                if provider:
+                    prob_desc = ticket.problem.description if ticket.problem.description!='others' else ticket.problem.category.description
+                    message = "Another Complaint of "+str(prob_desc)+" has registered for Toilet ID: " + str(toilet.toilet_id) + ", Ticket ID: " + str(
+                        ticket.id) + ", Issue Reported: " + problem.category.description
+                    if manager_remarks:
+                        message += ", Manager remarks: " + manager_remarks
+                    send_sms(provider.user_profile.phone_number, message)
 
         return HttpResponseRedirect(reverse('dashboard'))

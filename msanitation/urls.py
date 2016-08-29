@@ -11,6 +11,7 @@ import reporting.urls
 from django.contrib import admin
 from msanitation.views import Login, DashBoard, Profile, LogOut
 
+
 admin.autodiscover()
 
 urlpatterns = [

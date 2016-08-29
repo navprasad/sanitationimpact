@@ -30,3 +30,4 @@ class Manager(models.Model):
 
     class Meta:
         index_together = ["manager_id", "pin_code"]
+        ordering = ["user_profile__user__first_name"]

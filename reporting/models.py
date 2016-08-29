@@ -16,6 +16,7 @@ class Ticket(models.Model):
         (0, 'Unresolved'),
         (1, 'Resolved'),
         (2, 'Cannot fix'),
+        (3, 'Escalated'),
     )
 
     ticket_id = models.CharField(max_length=40, unique=True, db_index=True, default=uuid.uuid4)
@@ -30,6 +31,12 @@ class Ticket(models.Model):
     provider_remarks = models.TextField(blank=True, default='')
     user_remarks = models.TextField(blank=True, default='')
     manager_remarks = models.TextField(blank=True, default='')
+    complaints = models.IntegerField(default=1)
+    additional_complaints_info = models.CharField(max_length=65000)
+    
 
     def __unicode__(self):
         return str(self.id)
+
+    class Meta:
+        ordering = ['-timestamp']

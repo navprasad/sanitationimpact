@@ -1,5 +1,7 @@
 import urllib2
-
+import json
+import datetime
+from django.utils import timezone
 from django.shortcuts import get_object_or_404, render
 from django.views.generic import View
 from django.db import transaction
@@ -157,15 +159,18 @@ class ViewManager(View):
         manager = Manager.objects.get(manager_id=manager_id)
         related_toilets = Toilet.objects.filter(providers__manager=manager)
         tickets = Ticket.objects.filter(toilet__in=related_toilets)
-
         total_tickets = len(tickets)
-        unresolved_tickets = len(filter(lambda ticket: ticket.status == Ticket.UNRESOLVED, tickets))
-        resolved_tickets = total_tickets - unresolved_tickets
+        unresolved_tickets = len(Ticket.objects.filter(status=0,toilet__in=related_toilets))
+        resolved_tickets = len(Ticket.objects.filter(status=1,toilet__in=related_toilets))
+        cannot_fix_tickets = len(Ticket.objects.filter(status=2,toilet__in=related_toilets))
+        escalated_tickets = len(Ticket.objects.filter(status=3,toilet__in=related_toilets))
 
         return render(request, 'manager/dashboard.html', {'user': user, 'manager': manager, 'tickets': tickets,
                                                           'total_tickets': total_tickets,
                                                           'unresolved_tickets': unresolved_tickets,
-                                                          'resolved_tickets': resolved_tickets})
+                                                          'resolved_tickets': resolved_tickets,
+                                                          'cannot_fix_tickets': cannot_fix_tickets,
+                                                          'escalated_tickets': escalated_tickets,})
 
 
 class EditManager(View):
@@ -385,15 +390,18 @@ class ViewProvider(View):
         user = UserProfile.objects.get(user=request.user)
         provider = Provider.objects.get(provider_id=provider_id)
         tickets = Ticket.objects.filter(provider=provider)
-
         total_tickets = len(tickets)
-        unresolved_tickets = len(filter(lambda ticket: ticket.status == Ticket.UNRESOLVED, tickets))
-        resolved_tickets = total_tickets - unresolved_tickets
+        unresolved_tickets = len(Ticket.objects.filter(status=0,provider=provider))
+        resolved_tickets = len(Ticket.objects.filter(status=1,provider=provider))
+        cannot_fix_tickets = len(Ticket.objects.filter(status=2,provider=provider))
+        escalated_tickets = len(Ticket.objects.filter(status=3,provider=provider))
 
         return render(request, 'provider/dashboard.html', {'user': user, 'provider': provider, 'tickets': tickets,
                                                            'total_tickets': total_tickets,
                                                            'unresolved_tickets': unresolved_tickets,
-                                                           'resolved_tickets': resolved_tickets})
+                                                           'resolved_tickets': resolved_tickets,
+                                                           'cannot_fix_tickets': cannot_fix_tickets,
+                                                           'escalated_tickets': escalated_tickets})
 
 
 class EditProvider(View):
@@ -650,6 +658,727 @@ class DeleteToilet(View):
         except Toilet.DoesNotExist:
             pass
         return HttpResponseRedirect(reverse('view_toilets'))
+
+class ShowComplaints(View):
+    def get(self,request,ticket_id):
+        user = UserProfile.objects.get(user=request.user)
+        ticket = get_object_or_404(Ticket,id=ticket_id)
+        jsonDec = json.decoder.JSONDecoder()
+        complaint_list = jsonDec.decode(ticket.additional_complaints_info)
+        return render(request, 'administration/complaints.html', {'complaints': complaint_list,'user':user})
+
+class DisplayStats(View):
+    def get(self, request):
+        user = UserProfile.objects.get(user=request.user)
+        problem_category = ProblemCategory.objects.all()
+        providers = Provider.objects.all()
+        managers = Manager.objects.all()
+        toilets = Toilet.objects.all()
+        toilet_locations = set()
+        toilet_areas = (
+        ('R', 'Rural'),
+        ('U', 'Urban'),
+        ('PU', 'Peri Urban')
+    )
+        toilet_types = (
+        ('C', 'Community'),
+        ('P', 'Public'),
+        ('S', 'School'),
+        ('W', 'Women Sanitation Complex')
+    )
+        toilet_gender = (
+        ('B', 'Both'),
+        ('M', 'Male'),
+        ('F', 'Female')
+    )
+        toilet_payments =(
+        ('P', 'Paid'),
+        ('F', 'Free'),
+        ('B', 'Both (Pay + No Pay)'),
+        ('H', 'Household Contribution')
+    )
+        for toilet in toilets:
+            toilet_locations.add(toilet.location_code)
+        toilet_locations = sorted(list(toilet_locations))
+        stats = []
+        total = 0
+        for pc in problem_category:
+            l=[]
+            today = timezone.localtime(timezone.now())
+            tickets = Ticket.objects.filter(problem__category=pc,timestamp__month=today.month)
+            sum=0
+            for ticket in tickets:
+                sum+=ticket.complaints
+            if pc.description!='others':
+                l.append(pc.description)
+                l.append(sum)
+                total+=sum
+                stats.append(l)
+        percentages = []
+        for stat in stats:
+            if total!=0:
+                percentages.append(round(100 * float(stat[1])/float(total),2))
+            else:
+                percentages.append(0)
+        stats = zip(stats,percentages)
+        title = 'for '+today.strftime("%B")
+        return render(request, 'administration/stats.html', {'user':user,'title':title,'toilets':toilets,'toilet_locations':toilet_locations,'toilet_areas':toilet_areas,'toilet_types':toilet_types,'toilet_gender':toilet_gender,'toilet_payments':toilet_payments,'providers':providers,'managers':managers,'problem_category':problem_category,'stats':stats,})
+
+    def post(self,request):
+        user = UserProfile.objects.get(user=request.user)
+        problem_category = ProblemCategory.objects.all()
+        providers = Provider.objects.all()
+        managers = Manager.objects.all()
+        toilets = Toilet.objects.all()
+        toilet_locations = set()
+        toilet_areas = (
+        ('R', 'Rural'),
+        ('U', 'Urban'),
+        ('PU', 'Peri Urban')
+    )
+        toilet_types = (
+        ('C', 'Community'),
+        ('P', 'Public'),
+        ('S', 'School'),
+        ('W', 'Women Sanitation Complex')
+    )
+        toilet_gender = (
+        ('B', 'Both'),
+        ('M', 'Male'),
+        ('F', 'Female')
+    )
+        toilet_payments =(
+        ('P', 'Paid'),
+        ('F', 'Free'),
+        ('B', 'Both (Pay + No Pay)'),
+        ('H', 'Household Contribution')
+    )
+        status = request.POST.get('status_category')
+        if status=='All':
+            status = [0,1,2,3]
+        else:
+            status = [status]
+        for toilet in toilets:
+            toilet_locations.add(toilet.location_code)
+        toilet_locations = list(sorted(toilet_locations))
+        selected_problem_category = request.POST.get('problem_category')
+        startdate = request.POST.get('startDate')
+        temp = startdate.split('/')
+        if len(temp)==3:
+            startdate = datetime.date(int(temp[2]), int(temp[0]), int(temp[1]))
+        enddate = request.POST.get('endDate')
+        temp = enddate.split('/')
+        if len(temp)==3:
+            enddate = datetime.date(int(temp[2]), int(temp[0]), int(temp[1]))
+            enddate = enddate + datetime.timedelta(days=1)
+        title=''
+        total=0
+        if selected_problem_category=='All Categories':
+            filter_category = request.POST.get('filter_category')
+
+            if filter_category == 'All':
+                stats = []
+                for pc in problem_category:
+                    l=[]
+                    if startdate!='' and enddate!='':
+                        tickets = Ticket.objects.filter(problem__category=pc,timestamp__range= [startdate,enddate],status__in=status)
+                    elif startdate!='':
+                        tickets = Ticket.objects.filter(problem__category=pc,timestamp__gte= startdate,status__in=status)
+                    elif enddate!='':
+                        tickets = Ticket.objects.filter(problem__category=pc,timestamp__lt= enddate,status__in=status)
+                    else:
+                        tickets = Ticket.objects.filter(problem__category=pc,status__in=status)
+                    sum=0
+                    for ticket in tickets:
+                        sum+=ticket.complaints
+                    if pc.description!='others':
+                        l.append(pc.description)
+                        l.append(sum)
+                        stats.append(l)
+                        total+=sum
+                percentages = []
+                for stat in stats:
+                    if total!=0:
+                        percentages.append(round(100 * float(stat[1])/float(total),2))
+                    else:
+                        percentages.append(0)
+                stats = zip(stats,percentages)
+            
+            if filter_category == 'Filter By Provider':
+                stats = []
+                for pc in problem_category:
+                    l=[]
+                    provider_id = request.POST.get('providerSelect')
+                    provider = Provider.objects.get(id=provider_id)
+                    title = '(Provider:'+provider.user_profile.user.first_name+' '+provider.user_profile.user.last_name+')'
+                    if startdate!='' and enddate!='':
+                        tickets = Ticket.objects.filter(problem__category=pc,provider=provider,timestamp__range= [startdate,enddate],status__in=status)
+                    elif startdate!='':
+                        tickets = Ticket.objects.filter(problem__category=pc,provider=provider,timestamp__gte= startdate,status__in=status)
+                    elif enddate!='':
+                        tickets = Ticket.objects.filter(problem__category=pc,provider=provider,timestamp__lt= enddate,status__in=status)
+                    else:
+                        tickets = Ticket.objects.filter(problem__category=pc,provider=provider,status__in=status)
+                    sum=0
+                    for ticket in tickets:
+                        sum+=ticket.complaints
+                    total+=sum
+                    if pc.description!='others':
+                        l.append(pc.description)
+                        l.append(sum)
+                        stats.append(l)
+                percentages = []
+                for stat in stats:
+                    if total!=0:
+                        percentages.append(round(100 * float(stat[1])/float(total),2))
+                    else:
+                        percentages.append(0)  
+                stats = zip(stats,percentages)
+            if filter_category == 'Filter By Manager':
+                stats = []
+                for pc in problem_category:
+                    l=[]
+                    manager_id = request.POST.get('managerSelect')
+                    manager = Manager.objects.get(id=manager_id)
+                    title = '(Manager:'+manager.user_profile.user.first_name+' '+manager.user_profile.user.last_name+')'
+                    if startdate!='' and enddate!='':
+                        tickets = Ticket.objects.filter(problem__category=pc,provider__manager=manager,timestamp__range= [startdate,enddate],status__in=status)
+                    elif startdate!='':
+                        tickets = Ticket.objects.filter(problem__category=pc,provider__manager=manager,timestamp__gte= startdate,status__in=status)
+                    elif enddate!='':
+                        tickets = Ticket.objects.filter(problem__category=pc,provider__manager=manager,timestamp__lt= enddate,status__in=status)
+                    else:
+                        tickets = Ticket.objects.filter(problem__category=pc,provider__manager=manager,status__in=status)
+                    sum=0
+                    for ticket in tickets:
+                        sum+=ticket.complaints
+                    total+=sum
+                    if pc.description!='others':
+                        l.append(pc.description)
+                        l.append(sum)
+                        stats.append(l)
+                percentages = []
+                for stat in stats:
+                    if total!=0:
+                        percentages.append(round(100 * float(stat[1])/float(total),2))
+                    else:
+                        percentages.append(0)  
+                stats = zip(stats,percentages)
+            if filter_category == 'Filter By Toilet ID':
+                stats = []
+                for pc in problem_category:
+                    l=[]
+                    toilet_id = request.POST.get('toiletSelect')
+                    toilet = Toilet.objects.get(id=toilet_id)
+                    title = '(Toilet ID:'+toilet.toilet_id+')'
+                    if startdate!='' and enddate!='':
+                        tickets = Ticket.objects.filter(problem__category=pc,toilet=toilet,timestamp__range= [startdate,enddate],status__in=status)
+                    elif startdate!='':
+                        tickets = Ticket.objects.filter(problem__category=pc,toilet=toilet,timestamp__gte= startdate,status__in=status)
+                    elif enddate!='':
+                        tickets = Ticket.objects.filter(problem__category=pc,toilet=toilet,timestamp__lt= enddate,status__in=status)
+                    else:
+                        tickets = Ticket.objects.filter(problem__category=pc,toilet=toilet,status__in=status)
+                    sum=0
+                    for ticket in tickets:
+                        sum+=ticket.complaints
+                    total+=sum
+                    if pc.description!='others':
+                        l.append(pc.description)
+                        l.append(sum)
+                        stats.append(l)
+                percentages = []
+                for stat in stats:
+                    if total!=0:
+                        percentages.append(round(100 * float(stat[1])/float(total),2))
+                    else:
+                        percentages.append(0)  
+                stats = zip(stats,percentages) 
+            if filter_category == 'Filter By Toilet Location Code':
+                stats = []
+                for pc in problem_category:
+                    l=[]
+                    location_code= request.POST.get('toiletLocationSelect')
+                    title = '(Toilet Location Code:'+location_code+')'
+                    if startdate!='' and enddate!='':
+                        tickets = Ticket.objects.filter(problem__category=pc,toilet__location_code=location_code,timestamp__range= [startdate,enddate],status__in=status)
+                    elif startdate!='':
+                        tickets = Ticket.objects.filter(problem__category=pc,toilet__location_code=location_code,timestamp__gte= startdate,status__in=status)
+                    elif enddate!='':
+                        tickets = Ticket.objects.filter(problem__category=pc,toilet__location_code=location_code,timestamp__lt= enddate,status__in=status)
+                    else:
+                        tickets = Ticket.objects.filter(problem__category=pc,toilet__location_code=location_code,status__in=status)
+                    sum=0
+                    for ticket in tickets:
+                        sum+=ticket.complaints
+                    total+=sum
+                    if pc.description!='others':
+                        l.append(pc.description)
+                        l.append(sum)
+                        stats.append(l)
+                percentages = []
+                for stat in stats:
+                    if total!=0:
+                        percentages.append(round(100 * float(stat[1])/float(total),2))
+                    else:
+                        percentages.append(0)  
+                stats = zip(stats,percentages) 
+            if filter_category == 'Filter By Toilet Area':
+                stats = []
+                for pc in problem_category:
+                    l=[]
+                    area= request.POST.get('toiletAreaSelect')
+                    for toilet_area in toilet_areas:
+                        if toilet_area[0]==area:
+                            title = '(Toilet Area:'+toilet_area[1]+')'
+                    if startdate!='' and enddate!='':
+                        tickets = Ticket.objects.filter(problem__category=pc,toilet__area=area,timestamp__range= [startdate,enddate],status__in=status)
+                    elif startdate!='':
+                        tickets = Ticket.objects.filter(problem__category=pc,toilet__area=area,timestamp__gte= startdate,status__in=status)
+                    elif enddate!='':
+                        tickets = Ticket.objects.filter(problem__category=pc,toilet__area=area,timestamp__lt= enddate,status__in=status)
+                    else:
+                        tickets = Ticket.objects.filter(problem__category=pc,toilet__area=area,status__in=status)
+                    sum=0
+                    for ticket in tickets:
+                        sum+=ticket.complaints
+                    total+=sum
+                    if pc.description!='others':
+                        l.append(pc.description)
+                        l.append(sum)
+                        stats.append(l)
+                percentages = []
+                for stat in stats:
+                    if total!=0:
+                        percentages.append(round(100 * float(stat[1])/float(total),2))
+                    else:
+                        percentages.append(0)  
+                stats = zip(stats,percentages) 
+            if filter_category == 'Filter By Toilet Type':
+                stats = []
+                for pc in problem_category:
+                    l=[]
+                    type= request.POST.get('toiletTypeSelect')
+                    for toilet_type in toilet_types:
+                        if toilet_type[0]==type:
+                            title = '(Toilet Type:'+toilet_type[1]+')'
+                    if startdate!='' and enddate!='':
+                        tickets = Ticket.objects.filter(problem__category=pc,toilet__type=type,timestamp__range= [startdate,enddate],status__in=status)
+                    elif startdate!='':
+                        tickets = Ticket.objects.filter(problem__category=pc,toilet__type=type,timestamp__gte= startdate,status__in=status)
+                    elif enddate!='':
+                        tickets = Ticket.objects.filter(problem__category=pc,toilet__type=type,timestamp__lt= enddate,status__in=status)
+                    else:
+                        tickets = Ticket.objects.filter(problem__category=pc,toilet__type=type,status__in=status)
+                    sum=0
+                    for ticket in tickets:
+                        sum+=ticket.complaints
+                    total+=sum
+                    if pc.description!='others':
+                        l.append(pc.description)
+                        l.append(sum)
+                        stats.append(l)
+                percentages = []
+                for stat in stats:
+                    if total!=0:
+                        percentages.append(round(100 * float(stat[1])/float(total),2))
+                    else:
+                        percentages.append(0)  
+                stats = zip(stats,percentages) 
+            if filter_category == 'Filter By Toilet Gender':
+                stats = []
+                for pc in problem_category:
+                    l=[]
+                    gender = request.POST.get('toiletGenderSelect')
+                    for toilet_g in toilet_gender:
+                        if toilet_g[0]==gender:
+                            title = '(Toilet Gender:'+toilet_g[1]+')'
+                    if startdate!='' and enddate!='':
+                        tickets = Ticket.objects.filter(problem__category=pc,toilet__sex=gender,timestamp__range= [startdate,enddate],status__in=status)
+                    elif startdate!='':
+                        tickets = Ticket.objects.filter(problem__category=pc,toilet__sex=gender,timestamp__gte= startdate,status__in=status)
+                    elif enddate!='':
+                        tickets = Ticket.objects.filter(problem__category=pc,toilet__sex=gender,timestamp__lt= enddate,status__in=status)
+                    else:
+                        tickets = Ticket.objects.filter(problem__category=pc,toilet__sex=gender,status__in=status)
+                    sum=0
+                    for ticket in tickets:
+                        sum+=ticket.complaints
+                    total+=sum
+                    if pc.description!='others':
+                        l.append(pc.description)
+                        l.append(sum)
+                        stats.append(l)
+                percentages = []
+                for stat in stats:
+                    if total!=0:
+                        percentages.append(round(100 * float(stat[1])/float(total),2))
+                    else:
+                        percentages.append(0)  
+                stats = zip(stats,percentages) 
+            if filter_category == 'Filter By Toilet Payment':
+                stats = []
+                for pc in problem_category:
+                    l=[]
+                    payment= request.POST.get('toiletPaymentSelect')
+                    for toilet_payment in toilet_payments:
+                        if toilet_payment[0]==payment:
+                            title = '(Toilet Payment:'+toilet_payment[1]+')'
+                    if startdate!='' and enddate!='':
+                        tickets = Ticket.objects.filter(problem__category=pc,toilet__payment=payment,timestamp__range= [startdate,enddate],status__in=status)
+                    elif startdate!='':
+                        tickets = Ticket.objects.filter(problem__category=pc,toilet__payment=payment,timestamp__gte= startdate,status__in=status)
+                    elif enddate!='':
+                        tickets = Ticket.objects.filter(problem__category=pc,toilet__payment=payment,timestamp__lt= enddate,status__in=status)
+                    else:
+                        tickets = Ticket.objects.filter(problem__category=pc,toilet__payment=payment,status__in=status)
+                    sum=0
+                    for ticket in tickets:
+                        sum+=ticket.complaints
+                    total+=sum
+                    if pc.description!='others':
+                        l.append(pc.description)
+                        l.append(sum)
+                        stats.append(l)
+                percentages = []
+                for stat in stats:
+                    if total!=0:
+                        percentages.append(round(100 * float(stat[1])/float(total),2))
+                    else:
+                        percentages.append(0)  
+                stats = zip(stats,percentages) 
+        else:
+            filter_category = request.POST.get('filter_category')
+            if filter_category == 'All':
+                stats = []
+                problems = Problem.objects.filter(category=selected_problem_category)
+                for pc in problems:
+                    l=[]
+                    if startdate!='' and enddate!='':
+                        tickets = Ticket.objects.filter(problem=pc,timestamp__range= [startdate,enddate],status__in=status)
+                    elif startdate!='':
+                        tickets = Ticket.objects.filter(problem=pc,timestamp__gte= startdate,status__in=status)
+                    elif enddate!='':
+                        tickets = Ticket.objects.filter(problem=pc,timestamp__lt= enddate,status__in=status)
+                    else:
+                        tickets = Ticket.objects.filter(problem=pc,status__in=status)
+                    sum=0
+                    for ticket in tickets:
+                        sum+=ticket.complaints
+                    total+=sum
+                    if pc.description!='others':
+                        l.append(pc.description)
+                        l.append(sum)
+                        stats.append(l)
+                    else:
+                        l.append(pc.category.description)
+                        l.append(sum)
+                        stats.append(l)
+                percentages = []
+                for stat in stats:
+                    if total!=0:
+                        percentages.append(round(100 * float(stat[1])/float(total),2))
+                    else:
+                        percentages.append(0)
+                stats = zip(stats,percentages)
+            
+            if filter_category == 'Filter By Provider':
+                stats = []
+                problems = Problem.objects.filter(category=selected_problem_category)
+                for pc in problems:
+                    l=[]
+                    provider_id = request.POST.get('providerSelect')
+                    provider = Provider.objects.get(id=provider_id)
+                    title = '(Provider:'+provider.user_profile.user.first_name+' '+provider.user_profile.user.last_name+')'
+                    if startdate!='' and enddate!='':
+                        tickets = Ticket.objects.filter(problem=pc,provider=provider,timestamp__range= [startdate,enddate],status__in=status)
+                    elif startdate!='':
+                        tickets = Ticket.objects.filter(problem=pc,provider=provider,timestamp__gte= startdate,status__in=status)
+                    elif enddate!='':
+                        tickets = Ticket.objects.filter(problem=pc,provider=provider,timestamp__lt= enddate,status__in=status)
+                    else:
+                        tickets = Ticket.objects.filter(problem=pc,provider=provider,status__in=status)
+                    sum=0
+                    for ticket in tickets:
+                        sum+=ticket.complaints
+                    total += sum
+                    if pc.description!='others':
+                        l.append(pc.description)
+                        l.append(sum)
+                        stats.append(l)
+                    else:
+                        l.append(pc.category.description)
+                        l.append(sum)
+                        stats.append(l)
+                percentages = []
+                for stat in stats:
+                    if total!=0:
+                        percentages.append(round(100 * float(stat[1])/float(total),2))
+                    else:
+                        percentages.append(0)
+                stats = zip(stats,percentages)
+            if filter_category == 'Filter By Manager':
+                stats = []
+                problems = Problem.objects.filter(category=selected_problem_category)
+                for pc in problems:
+                    l=[]
+                    manager_id = request.POST.get('managerSelect')
+                    manager = Manager.objects.get(id=manager_id)
+                    title = '(Manager:'+manager.user_profile.user.first_name+' '+manager.user_profile.user.last_name+')'
+                    if startdate!='' and enddate!='':
+                        tickets = Ticket.objects.filter(problem=pc,provider__manager=manager,timestamp__range= [startdate,enddate],status__in=status)
+                    elif startdate!='':
+                        tickets = Ticket.objects.filter(problem=pc,provider__manager=manager,timestamp__gte= startdate,status__in=status)
+                    elif enddate!='':
+                        tickets = Ticket.objects.filter(problem=pc,provider__manager=manager,timestamp__lt= enddate,status__in=status)
+                    else:
+                        tickets = Ticket.objects.filter(problem=pc,provider__manager=manager,status__in=status)
+                    sum=0
+                    for ticket in tickets:
+                        sum+=ticket.complaints
+                    total += sum
+                    if pc.description!='others':
+                        l.append(pc.description)
+                        l.append(sum)
+                        stats.append(l)
+                    else:
+                        l.append(pc.category.description)
+                        l.append(sum)
+                        stats.append(l)
+                percentages = []
+                for stat in stats:
+                    if total!=0:
+                        percentages.append(round(100 * float(stat[1])/float(total),2))
+                    else:
+                        percentages.append(0)
+                stats = zip(stats,percentages)
+            if filter_category == 'Filter By Toilet ID':
+                stats = []
+                problems = Problem.objects.filter(category=selected_problem_category)
+                for pc in problems:
+                    l=[]
+                    toilet_id = request.POST.get('toiletSelect')
+                    toilet = Toilet.objects.get(id=toilet_id)
+                    title = '(Toilet ID:'+toilet.toilet_id+')'
+                    if startdate!='' and enddate!='':
+                        tickets = Ticket.objects.filter(problem=pc,toilet=toilet,timestamp__range= [startdate,enddate],status__in=status)
+                    elif startdate!='':
+                        tickets = Ticket.objects.filter(problem=pc,toilet=toilet,timestamp__gte= startdate,status__in=status)
+                    elif enddate!='':
+                        tickets = Ticket.objects.filter(problem=pc,toilet=toilet,timestamp__lt= enddate,status__in=status)
+                    else:
+                        tickets = Ticket.objects.filter(problem=pc,toilet=toilet,status__in=status)
+                    sum=0
+                    for ticket in tickets:
+                        sum+=ticket.complaints
+                    total += sum
+                    if pc.description!='others':
+                        l.append(pc.description)
+                        l.append(sum)
+                        stats.append(l)
+                    else:
+                        l.append(pc.category.description)
+                        l.append(sum)
+                        stats.append(l)
+                percentages = []
+                for stat in stats:
+                    if total!=0:
+                        percentages.append(round(100 * float(stat[1])/float(total),2))
+                    else:
+                        percentages.append(0)
+                stats = zip(stats,percentages)
+
+            if filter_category == 'Filter By Toilet Location Code':
+                stats = []
+                problems = Problem.objects.filter(category=selected_problem_category)
+                for pc in problems:
+                    l=[]
+                    location_code = request.POST.get('toiletLocationSelect')
+                    title = '(Toilet Location Code:'+location_code+')'
+                    if startdate!='' and enddate!='':
+                        tickets = Ticket.objects.filter(problem=pc,toilet__location_code=location_code,timestamp__range= [startdate,enddate],status__in=status)
+                    elif startdate!='':
+                        tickets = Ticket.objects.filter(problem=pc,toilet__location_code=location_code,timestamp__gte= startdate,status__in=status)
+                    elif enddate!='':
+                        tickets = Ticket.objects.filter(problem=pc,toilet__location_code=location_code,timestamp__lt= enddate,status__in=status)
+                    else:
+                        tickets = Ticket.objects.filter(problem=pc,toilet__location_code=location_code,status__in=status)
+                    sum=0
+                    for ticket in tickets:
+                        sum+=ticket.complaints
+                    total += sum
+                    if pc.description!='others':
+                        l.append(pc.description)
+                        l.append(sum)
+                        stats.append(l)
+                    else:
+                        l.append(pc.category.description)
+                        l.append(sum)
+                        stats.append(l)
+                percentages = []
+                for stat in stats:
+                    if total!=0:
+                        percentages.append(round(100 * float(stat[1])/float(total),2))
+                    else:
+                        percentages.append(0)
+                stats = zip(stats,percentages)
+            if filter_category == 'Filter By Toilet Area':
+                stats = []
+                problems = Problem.objects.filter(category=selected_problem_category)
+                for pc in problems:
+                    l=[]
+                    area = request.POST.get('toiletAreaSelect')
+                    for toilet_area in toilet_areas:
+                        if toilet_area[0]==area:
+                            title = '(Toilet Area:'+toilet_area[1]+')'
+                    if startdate!='' and enddate!='':
+                        tickets = Ticket.objects.filter(problem=pc,toilet__area=area,timestamp__range= [startdate,enddate],status__in=status)
+                    elif startdate!='':
+                        tickets = Ticket.objects.filter(problem=pc,toilet__area=area,timestamp__gte= startdate,status__in=status)
+                    elif enddate!='':
+                        tickets = Ticket.objects.filter(problem=pc,toilet__area=area,timestamp__lt= enddate,status__in=status)
+                    else:
+                        tickets = Ticket.objects.filter(problem=pc,toilet__area=area,status__in=status)
+                    sum=0
+                    for ticket in tickets:
+                        sum+=ticket.complaints
+                    total += sum
+                    if pc.description!='others':
+                        l.append(pc.description)
+                        l.append(sum)
+                        stats.append(l)
+                    else:
+                        l.append(pc.category.description)
+                        l.append(sum)
+                        stats.append(l)
+                percentages = []
+                for stat in stats:
+                    if total!=0:
+                        percentages.append(round(100 * float(stat[1])/float(total),2))
+                    else:
+                        percentages.append(0)
+                stats = zip(stats,percentages)
+            if filter_category == 'Filter By Toilet Type':
+                stats = []
+                problems = Problem.objects.filter(category=selected_problem_category)
+                for pc in problems:
+                    l=[]
+                    type = request.POST.get('toiletTypeSelect')
+                    for toilet_type in toilet_types:
+                        if toilet_type[0]==type:
+                            title = '(Toilet Type:'+toilet_type[1]+')'
+                    if startdate!='' and enddate!='':
+                        tickets = Ticket.objects.filter(problem=pc,toilet__type=type,timestamp__range= [startdate,enddate],status__in=status)
+                    elif startdate!='':
+                        tickets = Ticket.objects.filter(problem=pc,toilet__type=type,timestamp__gte= startdate,status__in=status)
+                    elif enddate!='':
+                        tickets = Ticket.objects.filter(problem=pc,toilet__type=type,timestamp__lt= enddate,status__in=status)
+                    else:
+                        tickets = Ticket.objects.filter(problem=pc,toilet__type=type,status__in=status)
+                    sum=0
+                    for ticket in tickets:
+                        sum+=ticket.complaints
+                    total += sum
+                    if pc.description!='others':
+                        l.append(pc.description)
+                        l.append(sum)
+                        stats.append(l)
+                    else:
+                        l.append(pc.category.description)
+                        l.append(sum)
+                        stats.append(l)
+                percentages = []
+                for stat in stats:
+                    if total!=0:
+                        percentages.append(round(100 * float(stat[1])/float(total),2))
+                    else:
+                        percentages.append(0)
+                stats = zip(stats,percentages)
+            if filter_category == 'Filter By Toilet Gender':
+                stats = []
+                problems = Problem.objects.filter(category=selected_problem_category)
+                for pc in problems:
+                    l=[]
+                    gender = request.POST.get('toiletGenderSelect')
+                    for toilet_g in toilet_gender:
+                        if toilet_g[0]==gender:
+                            title = '(Toilet Gender:'+toilet_g[1]+')'
+                    if startdate!='' and enddate!='':
+                        tickets = Ticket.objects.filter(problem=pc,toilet__sex=gender,timestamp__range= [startdate,enddate],status__in=status)
+                    elif startdate!='':
+                        tickets = Ticket.objects.filter(problem=pc,toilet__sex=gender,timestamp__gte= startdate,status__in=status)
+                    elif enddate!='':
+                        tickets = Ticket.objects.filter(problem=pc,toilet__sex=gender,timestamp__lt= enddate,status__in=status)
+                    else:
+                        tickets = Ticket.objects.filter(problem=pc,toilet__sex=gender,status__in=status)
+                    sum=0
+                    for ticket in tickets:
+                        sum+=ticket.complaints
+                    total += sum
+                    if pc.description!='others':
+                        l.append(pc.description)
+                        l.append(sum)
+                        stats.append(l)
+                    else:
+                        l.append(pc.category.description)
+                        l.append(sum)
+                        stats.append(l)
+                percentages = []
+                for stat in stats:
+                    if total!=0:
+                        percentages.append(round(100 * float(stat[1])/float(total),2))
+                    else:
+                        percentages.append(0)
+                stats = zip(stats,percentages)
+
+            if filter_category == 'Filter By Toilet Payment':
+                stats = []
+                problems = Problem.objects.filter(category=selected_problem_category)
+                for pc in problems:
+                    l=[]
+                    payment = request.POST.get('toiletPaymentSelect')
+                    for toilet_payment in toilet_payments:
+                        if toilet_payment[0]==payment:
+                            title = '(Toilet Payment:'+toilet_payment[1]+')'
+                    if startdate!='' and enddate!='':
+                        tickets = Ticket.objects.filter(problem=pc,toilet__payment=payment,timestamp__range= [startdate,enddate],status__in=status)
+                    elif startdate!='':
+                        tickets = Ticket.objects.filter(problem=pc,toilet__payment=payment,timestamp__gte= startdate,status__in=status)
+                    elif enddate!='':
+                        tickets = Ticket.objects.filter(problem=pc,toilet__payment=payment,timestamp__lt= enddate,status__in=status)
+                    else:
+                        tickets = Ticket.objects.filter(problem=pc,toilet__payment=payment,status__in=status)
+                    sum=0
+                    for ticket in tickets:
+                        sum+=ticket.complaints
+                    total += sum
+                    if pc.description!='others':
+                        l.append(pc.description)
+                        l.append(sum)
+                        stats.append(l)
+                    else:
+                        l.append(pc.category.description)
+                        l.append(sum)
+                        stats.append(l)
+                percentages = []
+                for stat in stats:
+                    if total!=0:
+                        percentages.append(round(100 * float(stat[1])/float(total),2))
+                    else:
+                        percentages.append(0)
+                stats = zip(stats,percentages)
+        if status[0]=='0' and len(status)==1:
+            status = 'Unresolved'
+        elif status[0] == '1':
+            status = 'resolved'
+        elif status[0] == '2':
+            status = 'Cannot Fix'
+        elif status[0] == '3':
+            status = 'Escalated'
+        else:
+            status = ''
+
+        return render(request, 'administration/stats.html', {'user':user,'status':status,'title':title,'toilets':toilets,'toilet_locations':toilet_locations,'toilet_areas':toilet_areas,'toilet_types':toilet_types,'toilet_gender':toilet_gender,'toilet_payments':toilet_payments,'providers':providers,'managers':managers,'problem_category':problem_category,'stats':stats,})
 
 
 """

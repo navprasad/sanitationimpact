@@ -17,13 +17,15 @@
                 </div>
             </div>
             <div class="clearfix"></div>
+
             <div class="row">
                 <div class="col-md-12">
                     <div class="x_panel">
                         <div class="x_content">
-                            <div class="col-md-9 col-sm-9 col-xs-12">
+                            <div class="col-md-10 col-sm-9 col-xs-12">
                                 <!-- page content -->
                                 <div>
+
                                     <div class="">
                                         <div class="page-title">
                                             <div class="title_left"><h3>Tickets</h3></div>
@@ -44,48 +46,52 @@
                                                 <div class="x_panel">
                                                     <div class="x_content">
                                                         <!-- start project list -->
-                                                        <table class="table table-striped projects">
+                                                        <table class="table table-striped projects" style="color:#4D4D4D;font-weight:bold;font-size:12px">
                                                             <thead>
                                                                 <tr>
-                                                                    <th style="width: 1%">#</th>
-                                                                    <th>Ticket ID</th>
-                                                                    <th class="text-center">Created Date</th>
-                                                                    <th>Toilet Address</th>
-                                                                    <th>Problem</th>
-                                                                    <th class="text-center">Recording</th>
-                                                                    <th class="text-center">Provider Recording</th>
-                                                                    <th class="text-center">Status</th>
-                                                                    <th class="text-center">Provider</th>
+                                                                    <th class="text-center" style="vertical-align:middle;">Ticket ID</th>
+                                                                    <th class="text-center" style="vertical-align:middle;">Created Date</th>
+                                                                    <th class="text-center" style="vertical-align:middle;">Toilet Address</th>
+                                                                    <th class="text-center" style="vertical-align:middle;">Problem</th>
+                                                                    <th class="text-center" style="vertical-align:middle;">Complaints</th>
+                                                                    <th class="text-center" style="vertical-align:middle;">Recording</th>
+                                                                    <th class="text-center" style="vertical-align:middle;">Provider Recording</th>
+                                                                    <th class="text-center" style="vertical-align:middle;">Status</th>
+                                                                    <th class="text-center" style="vertical-align:middle;">Provider</th>
+                                                                    <th class="text-center" style="vertical-align:middle;">Manager</th>
                                                                 </tr>
                                                             </thead>
                                                             <tbody>
                                                             {% for ticket in tickets %}
                                                                 <tr>
-                                                                    <td>
+                                                                    <td class="text-center" style="vertical-align:middle;">
+                                                                        <a href="
+                                                                        {% url 'report_problem_ticket' ticket.id %}"
+                                                                        >{{ ticket.id }}</a>
+                                                                    </td>
+                                                                    <td class="text-center" style="vertical-align:middle;">
                                                                         <a href="
                                                                         {% url 'report_problem_ticket' ticket.id %}">
-                                                                            #
+                                                                            {{ ticket.timestamp | date:"d.m.Y, h:i A" }}
                                                                         </a>
                                                                     </td>
-                                                                    <td>
-                                                                        <a href="
-                                                                        {% url 'report_problem_ticket' ticket.id %}">
-                                                                            {{ ticket.id }}
-                                                                        </a>
-                                                                    </td>
-                                                                    <td class="text-center">
-                                                                        <a href="
-                                                                        {% url 'report_problem_ticket' ticket.id %}">
-                                                                            {{ ticket.timestamp | date:"d.m.Y" }}
-                                                                        </a>
-                                                                    </td>
-                                                                    <td>
+                                                                    <td class="text-center" style="vertical-align:middle;">
                                                                         {{ ticket.toilet.address }}
                                                                     </td>
-                                                                    <td>
+                                                                    <td class="text-center" style="vertical-align:middle;">
+                                                                        {% if ticket.problem.description != 'others' %}
                                                                         {{ ticket.problem.description }}
+                                                                        {%else%}
+                                                                        {{ ticket.problem.category.description }}
+                                                                        {%endif%}
                                                                     </td>
-                                                                    <td class="text-center">
+                                                                    <td class="text-center" style="vertical-align:middle;">
+                                                                        <a href="
+                                                                        {% url 'complaints' ticket.id %}">
+                                                                            {{ ticket.complaints }}
+                                                                        </a>
+                                                                    </td>
+                                                                    <td class="text-center" style="vertical-align:middle;">
                                                                         {% if ticket.is_audio_present %}
                                                                         <a href="/media/ticket_audio_files/ticket_{{ ticket.id }}_audio.mp3">
                                                                         <span class="glyphicon glyphicon-download"
@@ -93,7 +99,7 @@
                                                                         </a>
                                                                         {% endif %}
                                                                     </td>
-                                                                    <td class="text-center">
+                                                                    <td class="text-center" style="vertical-align:middle;">
                                                                         {% if ticket.is_provider_audio_present %}
                                                                         <a href="/media/ticket_audio_files/ticket_{{ ticket.id }}_provider_audio.mp3">
                                                                         <span class="glyphicon glyphicon-download"
@@ -101,7 +107,7 @@
                                                                         </a>
                                                                         {% endif %}
                                                                     </td>
-                                                                    <td class="text-center">
+                                                                    <td class="text-center" style="vertical-align:middle;">
                                                                         <a href="
                                                                         {% url 'report_problem_ticket' ticket.id %}">
                                                                         {% if ticket.status == 0 %}
@@ -114,15 +120,28 @@
                                                                             </button>
                                                                         {% elif ticket.status == 2 %}
                                                                             <button type="button"
-                                                                                    class="btn btn-warning btn-xs">Cannot Fix
+                                                                                    class="btn btn-muted btn-xs">Cannot Fix
+                                                                            </button>
+                                                                        {% elif ticket.status == 3 %}
+                                                                            <button type="button"
+                                                                                    class="btn btn-warning btn-xs">Escalated
                                                                             </button>
                                                                         {% endif %}
                                                                         </a>
                                                                     </td>
-                                                                    <td>
+                                                                    <td class="text-center" style="vertical-align:middle;">
                                                                     {% if ticket.provider %}
-                                                                        <a href="{% url 'view_provider' ticket.provider.provider_id %}" class="btn btn-xs btn-primary">
+                                                                        <a href="{% url 'view_provider' ticket.provider.provider_id %}" >
                                                                         {{ ticket.provider.user_profile.user.first_name }} {{ ticket.provider.user_profile.user.last_name }}
+                                                                        </a>
+                                                                    {% else %}
+                                                                        Not Assigned
+                                                                    {% endif %}
+                                                                    </td>
+                                                                    <td class="text-center" style="vertical-align:middle;">
+                                                                    {% if ticket.provider %}
+                                                                        <a href="{% url 'view_manager' ticket.provider.manager.manager_id %}" ">
+                                                                        {{ ticket.provider.manager.user_profile.user.first_name }} {{ ticket.provider.manager.user_profile.user.last_name }}
                                                                         </a>
                                                                     {% else %}
                                                                         Not Assigned
@@ -133,19 +152,21 @@
                                                             </tbody>
                                                         </table>
                                                         <!-- end project list -->
-
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
+                                
                                 <!-- /page content -->
                             </div>
 
                             <!-- start project-detail sidebar -->
-                            <div class="col-md-3 col-sm-3 col-xs-12">
+                            <div class="col-md-2 col-sm-3 col-xs-12">
+
                                 <section class="panel">
+
                                     <div class="x_title">
                                         <h2 style="padding-bottom: 7px; padding-top: 4px; width: 100%;"
                                             class="text-center">User Profile</h2>
@@ -153,13 +174,13 @@
                                     </div>
                                     <div class="panel-body">
                                         <div class="row">
-                                            <div class="col-md-6 text-center">
+                                            <div class="col-md-12 text-center">
                                                 <img style="border-radius: 20px; max-height: 150px; max-width: 100%;"
                                                      src="/media/{{ user.picture }}"/>
                                             </div>
 
                                             <br/>
-                                            <div class="col-md-6">
+                                            <div class="col-md-12 text-center">
                                                 <div class="project_detail">
                                                     <p class="title">Phone Number</p>
                                                     <p>{{ user.phone_number }}</p>
@@ -174,24 +195,35 @@
 
                                 </section>
                                 <section>
-
                                     <div class="row">
-                                        <div class="col-md-6">
+                                        <div class="col-md-12">
                                             <div class="text-center tile-stats">
-                                                <div class="count text-muted">{{ resolved_tickets }}</div>
-                                                <h3><span class="text-success">Resolved</span></h3>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="text-center tile-stats">
-                                                <div class="count text-muted">{{ unresolved_tickets }}</div>
-                                                <h3><span class="text-danger">Unresolved</span></h3>
+                                                <div class="count text-success" style="font-size:30px;">{{ resolved_tickets }}</div>
+                                                <h4 style="margin-left:10px;"><span class="text-success"><b>Resolved</b></span></h3>
                                             </div>
                                         </div>
                                         <div class="col-md-12">
                                             <div class="text-center tile-stats">
-                                                <div class="count text-muted">{{ total_tickets }}</div>
-                                                <h3><span class="text-primary">Total</span></h3>
+                                                <div class="count text-danger" style="font-size:30px;">{{ unresolved_tickets }}</div>
+                                                <h4 style="margin-left:10px;"><span class="text-danger"><b>Unresolved</b></span></h3>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="text-center tile-stats">
+                                                <div class="count text-warning" style="font-size:30px;">{{ escalated_tickets }}</div>
+                                                <h4 style="margin-left:10px;"><span class="text-warning"><b>Escalated</b></span></h3>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="text-center tile-stats">
+                                                <div class="count text-muted" style="font-size:30px;">{{ cannot_fix_tickets }}</div>
+                                                <h4 style="margin-left:10px;"><span class="text-muted"><b>Cannot Fix</b></span></h3>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="text-center tile-stats">
+                                                <div class="count text-primary" style="font-size:30px;">{{ total_tickets }}</div>
+                                                <h4 style="margin-left:10px;"><span class="text-primary"><b>Total</b></span></h3>
                                             </div>
                                         </div>
                                     </div>
@@ -207,6 +239,7 @@
         </div>
     </div>
     <!-- /page content -->
+
 {% endblock %}
 
 {% block jsLinks %}
